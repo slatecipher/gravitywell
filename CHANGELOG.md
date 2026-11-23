@@ -8,4 +8,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- `PiHole` and `AsyncPiHole`, clients for a Pi-hole's v6 REST API, with `api.info.version()` for the installed versions of the Pi-hole's components (`GET /api/info/version`).
+- `PiHole` and `AsyncPiHole`, clients for a Pi-hole's v6 REST API, with `api.info.version()` for the installed versions of the Pi-hole's components (`GET /api/info/version`). Each endpoint returns a model of its whole response body.

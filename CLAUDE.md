@@ -27,6 +27,7 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 
 - Write each sync endpoint on a `Resource` and its async twin on an `AsyncResource`, in the same change, so they never drift.
 - Put `/api` in the base URL; resource prefixes are absolute (`Resource(prefix="/stats")`).
+- An endpoint returns a model of its whole response body, named `<Endpoint>Response` (`VersionResponse`), with no `decoder=` to unwrap Pi-hole's `{"version": ...}` envelopes: unwrapping would drop siblings such as `processed`. Model only the fields used; Pydantic ignores the rest.
 - ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
 
 ## Pi-hole

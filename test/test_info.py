@@ -1,7 +1,7 @@
 import httpx2
 import pytest
 
-from gravitywell import AsyncPiHole, PiHole, Versions
+from gravitywell import AsyncPiHole, PiHole, VersionResponse
 
 BASE_URL = "http://pi.hole/api"
 
@@ -27,7 +27,8 @@ VERSION_BODY = {
 }
 
 
-def installed(versions: Versions) -> tuple[str | None, str | None, str | None]:
+def installed(body: VersionResponse) -> tuple[str | None, str | None, str | None]:
+    versions = body.version
     return versions.core.local.version, versions.web.local.version, versions.ftl.local.version
 
 

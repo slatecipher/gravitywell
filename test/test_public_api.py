@@ -16,6 +16,7 @@ def test_package_exports() -> None:
             "PiHole",
             "ComponentVersion",
             "LocalVersion",
+            "VersionResponse",
             "Versions",
         ]
     )

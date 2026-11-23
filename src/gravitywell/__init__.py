@@ -4,11 +4,11 @@ Example:
     from gravitywell import PiHole
 
     with PiHole("http://pi.hole/api") as api:
-        print(api.info.version().ftl.local.version)
+        print(api.info.version().version.ftl.local.version)
 """
 
 from gravitywell._client import AsyncPiHole, PiHole
-from gravitywell._info import ComponentVersion, LocalVersion, Versions
+from gravitywell._info import ComponentVersion, LocalVersion, VersionResponse, Versions
 from gravitywell._version import __version__
 
 __all__ = [
@@ -20,5 +20,6 @@ __all__ = [
     # gravitywell._info
     "ComponentVersion",
     "LocalVersion",
+    "VersionResponse",
     "Versions",
 ]
