@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [mainline]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only by default; a job that needs more (dependabot-auto-merge) asks for it.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python
+        run: uv python install
+
+      # Only the dev group is needed; ruff does not import the package.
+      - name: Install dependencies
+        run: uv sync --locked --only-group dev
+
+      - name: Run ruff
+        run: make lint-ci
+
+  typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --locked --all-groups --reinstall-package gravitywell
+
+      - name: Run pyright
+        run: make typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+    # Without this, uv sync/run use .python-version (3.12) whatever the matrix says.
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # --reinstall-package gravitywell: rebuild the project's editable install, so its
+      # metadata (such as the version gravitywell.__version__ reads) matches pyproject.toml.
+      - name: Install dependencies
+        run: uv sync --locked --all-groups --reinstall-package gravitywell
+
+      - name: Run tests
+        run: make test-ci
+
+  # Test the lowest versions pyproject.toml allows; env is job-wide so `uv run` keeps them.
+  test-lowest:
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: "3.12"
+      UV_RESOLUTION: lowest-direct
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install lowest direct dependencies
+        run: uv sync --all-groups --reinstall-package gravitywell
+
+      - name: Run tests
+        run: make test-ci
+
+  # Build and check the package as release.yml does, so a packaging problem shows
+  # up on the pull request that causes it, not on release day. Nothing is uploaded.
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Build
+        run: uv build
+
+      - name: Check package metadata
+        run: uvx twine check --strict dist/*
+
+      - name: Smoke-test the wheel in a clean environment
+        run: uv run --isolated --no-project --with dist/*.whl python -c "import gravitywell; print(gravitywell.__version__)"
+
+  # Merge Dependabot patch/minor updates once all jobs pass; majors need manual review.
+  dependabot-auto-merge:
+    needs: [lint, typecheck, test, test-lowest, build]
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Read Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # update-type is the largest change in the PR, so a grouped update with
+      # one major bump is left for review as a whole.
+      - name: Merge patch and minor updates
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr merge --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

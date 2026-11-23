@@ -1,0 +1,57 @@
+[project]
+name = "gravitywell"
+version = "0.0.0"
+description = "A third-party, typed Python client for the Pi-hole v6 REST API"
+readme = "README.md"
+authors = [
+    { name = "slatecipher", email = "25094255+slatecipher@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["pi-hole", "dns", "ad-blocking", "api", "client", "httpx2", "pydantic", "typed"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: Pydantic :: 2",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: Name Service (DNS)",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+dependencies = [
+    "clientx>=0.4.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.411",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.10",
+]
+
+[tool.pytest]
+addopts = ["--import-mode=importlib", "-vv", "--cov=gravitywell", "--cov-report=term-missing"]
+# All of pytest's strictness checks. pytest may add more in a release; uv.lock pins it,
+# so a new one shows up in the Dependabot PR that upgrades pytest, not on mainline.
+strict = true
+
+[tool.pyright]
+# Editors check both trees. `make typecheck` passes `src` on the command line
+# (which overrides this list), so CI gates only the shipped package.
+include = ["src", "test"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+# The shipped package is held to strict mode; tests stay on standard.
+strict = ["src"]

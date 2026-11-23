@@ -1,0 +1,27 @@
+line-length = 120
+target-version = "py312"
+
+[lint]
+preview = true
+select = ["A", "D", "E3", "E4", "E5", "E7", "E9", "F", "UP", "B", "S", "I", "N", "C90", "C4", "BLE", "W505"]
+
+# D105 and D107: a standard dunder, or an `__init__` that only stores its arguments, needs no docstring.
+ignore = ["D105", "D107"]
+
+fixable = ["ALL"]
+
+[lint.per-file-ignores]
+"test/**" = ["D", "S101", "S105"]
+
+[lint.pydocstyle]
+convention = "google"
+
+# Docstrings and comments wrap at 80 columns (W505), though code wraps at 120. See CONTRIBUTING.md.
+[lint.pycodestyle]
+max-doc-length = 80
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
