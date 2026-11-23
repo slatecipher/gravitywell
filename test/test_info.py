@@ -1,7 +1,8 @@
 import httpx2
 import pytest
 
-from gravitywell import AsyncPiHole, PiHole, VersionResponse
+from gravitywell import AsyncPiHole, PiHole
+from gravitywell.models import VersionResponse
 
 BASE_URL = "http://pi.hole/api"
 

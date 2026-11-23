@@ -21,13 +21,20 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 - Pyright is strict on `src`: complete annotations, and explicit types on empty containers.
 - CI runs the tests on Python 3.12 to 3.14, and on the lowest dependency versions `pyproject.toml` allows.
 
+## Layout
+
+- `models/`: the Pydantic models of request and response bodies, one private module per API area (`models/_info.py`), all re-exported from `gravitywell.models`, the one public path for a model. Model names are unique across areas. Models never import ClientX.
+- `_resources/`: one module per API area (`_resources/info.py`), holding the area's sync `Resource` and its async `AsyncResource` side by side. Private: callers reach them as `api.info`.
+- `_client.py`: `PiHole` and `AsyncPiHole`, which mount one resource per area. The top-level `gravitywell` namespace exports only the clients (and later the auth) and `__version__`.
+- Tests: one file per API area (`test_info.py`); `test_public_api.py` pins the exports of `gravitywell` and `gravitywell.models`.
+
 ## ClientX
 
 Read ClientX from its public repo, as an outside user would: its [`llms.txt`](https://github.com/slatecipher/ClientX/blob/mainline/llms.txt) before writing endpoints, the [guide](https://github.com/slatecipher/ClientX/tree/mainline/docs) for each feature, and its source when the docs don't answer. When ClientX makes something awkward, say so before working around it: gravitywell doubles as ClientX's first real client, and a ClientX issue is often the better fix.
 
 - Write each sync endpoint on a `Resource` and its async twin on an `AsyncResource`, in the same change, so they never drift.
 - Put `/api` in the base URL; resource prefixes are absolute (`Resource(prefix="/stats")`).
-- An endpoint returns a model of its whole response body, named `<Endpoint>Response` (`VersionResponse`), with no `decoder=` to unwrap Pi-hole's `{"version": ...}` envelopes: unwrapping would drop siblings such as `processed`. Each one extends `BaseResponse` (`_response.py`), which holds `took`, the field every Pi-hole response has. Model only the fields used; Pydantic ignores the rest.
+- An endpoint returns a model of its whole response body, named `<Endpoint>Response` (`VersionResponse`), with no `decoder=` to unwrap Pi-hole's `{"version": ...}` envelopes: unwrapping would drop siblings such as `processed`. Each one extends `BaseResponse` (`models/_base.py`), which holds `took`, the field every Pi-hole response has. Model only the fields used; Pydantic ignores the rest.
 - ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
 
 ## Pi-hole

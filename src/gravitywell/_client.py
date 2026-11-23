@@ -2,7 +2,7 @@
 
 from clientx import AsyncClientX, ClientX
 
-from gravitywell._info import AsyncInfo, Info
+from gravitywell._resources.info import AsyncInfo, Info
 from gravitywell._version import __version__
 
 

@@ -1,5 +1,7 @@
 """A third-party, typed client for the Pi-hole v6 REST API.
 
+The models of request and response bodies are in ``gravitywell.models``.
+
 Example:
     from gravitywell import PiHole
 
@@ -8,8 +10,6 @@ Example:
 """
 
 from gravitywell._client import AsyncPiHole, PiHole
-from gravitywell._info import ComponentVersion, LocalVersion, VersionResponse, Versions
-from gravitywell._response import BaseResponse
 from gravitywell._version import __version__
 
 __all__ = [
@@ -18,11 +18,4 @@ __all__ = [
     # gravitywell._client
     "AsyncPiHole",
     "PiHole",
-    # gravitywell._info
-    "ComponentVersion",
-    "LocalVersion",
-    "VersionResponse",
-    "Versions",
-    # gravitywell._response
-    "BaseResponse",
 ]
