@@ -3,6 +3,8 @@
 from clientx import AsyncResource, Resource, method
 from pydantic import BaseModel
 
+from gravitywell._response import BaseResponse
+
 
 class LocalVersion(BaseModel):
     """The version of a component installed on the Pi-hole."""
@@ -24,7 +26,7 @@ class Versions(BaseModel):
     ftl: ComponentVersion
 
 
-class VersionResponse(BaseModel):
+class VersionResponse(BaseResponse):
     """The body of ``GET /info/version``."""
 
     version: Versions
