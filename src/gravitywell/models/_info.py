@@ -1,24 +1,24 @@
-"""Models for the information endpoints, under ``/info``."""
+"""Models for the information endpoints, under `/info`."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from gravitywell.models._base import BaseResponse
 
 
 class LocalVersion(BaseModel):
-    """The version of a component installed on the Pi-hole."""
+    """A component as installed on the Pi-hole."""
 
-    version: str | None
+    version: str | None = Field(description="Its version, such as `v6.1`, or `null` if the Pi-hole doesn't report one.")
 
 
 class ComponentVersion(BaseModel):
-    """The versions of one Pi-hole component."""
+    """A Pi-hole component's version, as installed, under `local`."""
 
     local: LocalVersion
 
 
 class Versions(BaseModel):
-    """The versions of the Pi-hole's components."""
+    """The version of each component: core, web and FTL."""
 
     core: ComponentVersion
     web: ComponentVersion
@@ -26,6 +26,6 @@ class Versions(BaseModel):
 
 
 class VersionResponse(BaseResponse):
-    """The body of ``GET /info/version``."""
+    """The Pi-hole's version report."""
 
     version: Versions

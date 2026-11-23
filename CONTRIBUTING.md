@@ -43,10 +43,13 @@ Docstrings follow the [Google Python Style Guide](https://google.github.io/style
 
 - **When to write one:**
   - Public modules, classes, and complex functions: always. A module docstring says what the module does, with an example.
-  - Simple public functions: a one-line docstring only (`"""Do X."""`). Leave out `Args:`, `Returns:` and `Raises:` when the signature and type hints make them obvious.
+  - Simple public functions: a one-line docstring only (`"""Do X."""`). Leave out `Args:`, `Returns:` and `Raises:` when the signature and type hints make them obvious. Endpoints are the exception: see "Written for a model" below.
   - Private helpers (`_helper`): none, unless the logic is non-obvious or tricky, or has side effects.
   - Standard dunder methods (`__str__`, `__repr__`, `__eq__`): none. Document `__init__` only if it takes non-trivial arguments or has setup side effects. Ruff's D105 and D107 are off for this.
   - Test functions (`test_*`): none. The name says what the test checks.
+- **Written for a model:** some docstrings reach AI models through ClientX's tools. An endpoint's docstring up to its first section is its tool's description, and its `Args:` entries describe the arguments. A model's class docstring and its fields' `Field(description=...)` describe the tool's result. Write them for a reader who sees nothing else, as ClientX's [guide](https://github.com/slatecipher/ClientX/blob/mainline/docs/tools.md#writing-descriptions-for-a-model) says:
+  - Start an endpoint's docstring with what it does, in one line. In the paragraph after it, say when to use it, rather than a similar endpoint, and what to expect: side effects, limits and errors. `Returns:`, `Raises:` and the other sections never reach the model.
+  - Give each argument's and field's format, unit and allowed values, such as `v6.1` or seconds, and let types say what they can: a `Literal` lists the allowed values.
 - **No bloat:**
   - Don't repeat type hints: no `(int)` or `(str)` in `Args:` or `Returns:`.
   - No filler, such as `name: The name.` If every parameter is self-explanatory, leave out `Args:`. Ruff's D417 wants every parameter once there's an `Args:` section, so when only one needs explaining, explain it in the description instead.
@@ -56,7 +59,7 @@ Docstrings follow the [Google Python Style Guide](https://google.github.io/style
   - Start with a one-line imperative summary that ends with a period, such as `"""Fetch the blocking status."""`, and follow it with a blank line if more follows. The summary fits on one line.
   - Write section headers exactly as `Args:`, `Returns:`, `Yields:`, `Raises:` and `Attributes:`. Indent their content 4 spaces, with a hanging indent for wrapped lines.
   - Leave out `Returns:` for a function that returns `None`.
-  - Mark code with double backticks, as in `` ``name`` ``.
+  - Mark code with single backticks, as in `` `name` ``. It's Markdown, which a model reads as meant; reStructuredText's double backticks reach it raw.
 
 ## Pull requests
 

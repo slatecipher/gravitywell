@@ -1,4 +1,4 @@
-"""The information endpoints, under ``/info``."""
+"""The information endpoints, under `/info`."""
 
 from clientx import AsyncResource, Resource, method
 
@@ -10,7 +10,13 @@ class Info(Resource, prefix="/info"):
 
     @method.get("/version")
     def version(self) -> VersionResponse:
-        """Fetch the installed versions of the Pi-hole's components."""
+        """Fetch the installed versions of the Pi-hole's components.
+
+        Pi-hole has three: core (its scripts and the `pihole` command), web
+        (the web interface) and FTL (the DNS server, which also serves this
+        API). Use it to check which Pi-hole release runs, such as before
+        reporting a problem.
+        """
         ...
 
 
@@ -19,5 +25,11 @@ class AsyncInfo(AsyncResource, prefix="/info"):
 
     @method.get("/version")
     async def version(self) -> VersionResponse:
-        """Fetch the installed versions of the Pi-hole's components."""
+        """Fetch the installed versions of the Pi-hole's components.
+
+        Pi-hole has three: core (its scripts and the `pihole` command), web
+        (the web interface) and FTL (the DNS server, which also serves this
+        API). Use it to check which Pi-hole release runs, such as before
+        reporting a problem.
+        """
         ...
