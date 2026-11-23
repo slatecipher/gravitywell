@@ -9,7 +9,16 @@ import gravitywell
 
 
 def test_package_exports() -> None:
-    assert sorted(gravitywell.__all__) == sorted(["__version__"])
+    assert sorted(gravitywell.__all__) == sorted(
+        [
+            "__version__",
+            "AsyncPiHole",
+            "PiHole",
+            "ComponentVersion",
+            "LocalVersion",
+            "Versions",
+        ]
+    )
     for name in gravitywell.__all__:
         assert hasattr(gravitywell, name), name
 
