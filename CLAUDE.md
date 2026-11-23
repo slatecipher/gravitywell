@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-gravitywell is a third-party, typed Python client for the Pi-hole v6 REST API, built on [ClientX](https://github.com/slatecipher/ClientX) (a local checkout is at `~/workspaces/ClientX`). Python 3.12+. Pre-1.0. It supports Pi-hole v6 only, with sync (`PiHole`) and async (`AsyncPiHole`) clients that ship together.
+gravitywell is a third-party, typed Python client for the Pi-hole v6 REST API, built on [ClientX](https://github.com/slatecipher/ClientX). Python 3.12+. Pre-1.0. It supports Pi-hole v6 only, with sync (`PiHole`) and async (`AsyncPiHole`) clients that ship together.
 
 ## Commands
 
@@ -23,7 +23,7 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 
 ## ClientX
 
-Read ClientX's `llms.txt` before writing endpoints, and its source when the docs don't answer. When ClientX makes something awkward, say so before working around it: gravitywell doubles as ClientX's first real client, and a ClientX issue is often the better fix.
+Read ClientX from its public repo, as an outside user would: its [`llms.txt`](https://github.com/slatecipher/ClientX/blob/mainline/llms.txt) before writing endpoints, the [guide](https://github.com/slatecipher/ClientX/tree/mainline/docs) for each feature, and its source when the docs don't answer. When ClientX makes something awkward, say so before working around it: gravitywell doubles as ClientX's first real client, and a ClientX issue is often the better fix.
 
 - Write each sync endpoint on a `Resource` and its async twin on an `AsyncResource`, in the same change, so they never drift.
 - Put `/api` in the base URL; resource prefixes are absolute (`Resource(prefix="/stats")`).
