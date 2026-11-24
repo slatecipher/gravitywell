@@ -1,0 +1,12 @@
+# The docs' samples, which read like a user's code: `gravitywell` sorts with the
+# other third-party imports, and samples need no docstrings of their own. They
+# wrap at 100 columns, so the pages show them without scrolling sideways, and
+# their comments wrap with the code, not at 80 as the package's do (W505).
+extend = "../ruff.toml"
+line-length = 100
+
+[lint]
+ignore = ["D", "S101", "W505"]
+
+[lint.isort]
+known-third-party = ["gravitywell"]

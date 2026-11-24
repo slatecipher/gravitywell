@@ -11,14 +11,15 @@ gravitywell is a third-party, typed Python client for the Pi-hole v6 REST API, b
 ```bash
 uv sync --all-groups --reinstall-package gravitywell   # install; rerun after changing pyproject.toml (the version comes from metadata)
 make check            # lint + typecheck + test
-make lint             # ruff format + ruff check --fix on src and test
-make typecheck        # pyright, strict on src; gates CI
+make lint             # ruff format + ruff check --fix on src, test, docs_src and scripts, then make docs
+make typecheck        # pyright, strict on src, docs_src and scripts; gates CI
+make docs             # copy the samples in docs_src/ into the pages that show them
 make test-ci          # pytest with the 95% coverage gate CI uses (make test: without the gate)
 uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without coverage
 ```
 
-- Ruff wraps code at 120 columns, and docstrings and comments at 80 (W505). `make lint` doesn't fix W505: rewrap by hand.
-- Pyright is strict on `src`: complete annotations, and explicit types on empty containers.
+- Ruff wraps code at 120 columns, and docstrings and comments at 80 (W505). `make lint` doesn't fix W505: rewrap by hand. The docs' samples wrap at 100, comments too, so pages show them without scrolling sideways.
+- Pyright is strict on `src`, `docs_src` and `scripts`: complete annotations, and explicit types on empty containers.
 - CI runs the tests on Python 3.12 to 3.14, and on the lowest dependency versions `pyproject.toml` allows.
 
 ## Layout
@@ -30,6 +31,13 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 - `_insights.py`: the logic of the insights tools, `explain_domain`, `explain_client` and `check_health`, which answer in one call what takes several endpoints. They're `@tool` methods on `PiHole` and `AsyncPiHole` themselves, as a ClientX resource can't call another, tagged `insights` and read-only: the methods make the requests, sync or async, and `_insights.py` builds the answer from the replies.
 - `mcp.py`: the public `gravitywell.mcp` module, an MCP server on FastMCP through `clientx.fastmcp`, in the `mcp` extra: `create_server()` and the `gravitywell-mcp` command (click). It registers the read-only tools unless allowed, by hint, and the areas asked for, by tag; the password comes from `PIHOLE_PASSWORD` only, in the environment or a `--env-file`, never an option. The server closes its client, logging out, when it stops.
 - Tests: one file per API area (`test_info.py`); `test_pi_hole.py` covers the client classes themselves, and `test_public_api.py` pins the exports of `gravitywell` and `gravitywell.models`.
+
+## Docs
+
+- `README.md` is the PyPI page: short, with absolute GitHub links into the guide in `docs/`, whose pages link to each other relatively. `docs/README.md` indexes the guide. `llms.txt` is a compact guide for AI assistants and must match the docs and the API.
+- Code samples are modules in `docs_src/<page>/<name>.py`, checked by `make lint` and `make typecheck` and run by `test/test_docs.py` up to their first request, with `PIHOLE_PASSWORD` set, in a temporary directory holding a `pihole-backup.zip`; a sample's `test_` functions run in full. A page shows a copy after a `<!-- docs_src/... -->` comment: edit the file, then run `make docs` (`scripts/sync_docs.py`), which `make lint` runs too. The tests fail while a copy is stale or a ```` ```python ```` block has no file; a deliberate fragment is fenced ```` ```python no-check ````.
+- `test/test_docs.py` also holds `docs/reference.md` to every public method, `docs/mcp.md`'s areas table to every tool's area, and `README.md`, `docs/compatibility.md` and `llms.txt` to `PIHOLE_VERSIONS`. A new endpoint goes in the reference's table for its area, with its Pi-hole endpoint and tool hint, and in its guide page.
+- The logo, `docs/assets/logo-light.svg` and `logo-dark.svg`, is the wordmark in Noto Sans CJK JP Bold (the font of ClientX's logo), converted to paths at 48 px with -10 units of tracking, so it doesn't depend on the viewer's fonts. Its `w` is two downward chevrons, the second faded, in sky blue (`#0284c7` light, `#38bdf8` dark), as ClientX's X is two orange chevrons. The README shows it with a `<picture>`: relative sources for GitHub, and the absolute light URL as the fallback PyPI shows.
 
 ## ClientX
 
