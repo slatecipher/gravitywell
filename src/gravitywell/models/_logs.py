@@ -27,10 +27,13 @@ class LogResponse(BaseResponse):
 
     log: list[LogLine] = Field(description="The lines, the oldest first.")
     next_id: int = Field(
-        alias="nextID", description="Pass it as `next_id` on the next call to get only the lines written since."
+        alias="nextID",
+        description="Pass it as `next_id` on the next call to get only the lines written since. If it's lower than "
+        "the `next_id` passed, the log started over, as after FTL restarts or the query logs are flushed: call again "
+        "without `next_id`.",
     )
     pid: int = Field(
-        description="FTL's process ID. When it changes, FTL restarted: call again without `next_id` to read the log "
-        "from its start."
+        description="FTL's process ID. It changes when FTL's process is replaced, but not when FTL restarts itself, "
+        "as the restart endpoint does: a lower `next_id` tells that the log started over."
     )
     file: str = Field(description="The log file's path on the Pi-hole's machine, such as `/var/log/pihole/FTL.log`.")
