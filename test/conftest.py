@@ -26,8 +26,9 @@ def serve(sent: list[httpx2.Request]) -> Callable[[object], httpx2.MockTransport
     """Make transports that answer like a Pi-hole.
 
     `serve(body)` answers each login and logout, and every other request with
-    `body`, which it records in `sent`. Test modules can't import from here, so
-    each one names the type: `type Serve = Callable[[object], MockTransport]`.
+    `body` as JSON, or `body` itself if it's an `httpx2.Response`, and records
+    the request in `sent`. Test modules can't import from here, so each one
+    names the type: `type Serve = Callable[[object], MockTransport]`.
     """
 
     def transport(body: object) -> httpx2.MockTransport:
@@ -35,6 +36,8 @@ def serve(sent: list[httpx2.Request]) -> Callable[[object], httpx2.MockTransport
             if request.url.path == "/api/auth":
                 return httpx2.Response(200, json=SESSION_BODY)
             sent.append(request)
+            if isinstance(body, httpx2.Response):
+                return body
             return httpx2.Response(200, json=body)
 
         return httpx2.MockTransport(handler)
