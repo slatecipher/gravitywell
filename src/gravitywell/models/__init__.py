@@ -22,6 +22,13 @@ from gravitywell.models._clients import (
     ClientSuggestionsResponse,
     ConfiguredClient,
 )
+from gravitywell.models._config import (
+    CnameRecord,
+    CnameRecordsResponse,
+    DnsRecord,
+    DnsRecordsResponse,
+    UpstreamServersResponse,
+)
 from gravitywell.models._dhcp import DhcpLease, DhcpLeasesResponse
 from gravitywell.models._dns import BlockingResponse
 from gravitywell.models._domains import (
@@ -163,6 +170,12 @@ __all__ = [
     "ClientSuggestionsResponse",
     "ClientsResponse",
     "ConfiguredClient",
+    # gravitywell.models._config
+    "CnameRecord",
+    "CnameRecordsResponse",
+    "DnsRecord",
+    "DnsRecordsResponse",
+    "UpstreamServersResponse",
     # gravitywell.models._dhcp
     "DhcpLease",
     "DhcpLeasesResponse",
