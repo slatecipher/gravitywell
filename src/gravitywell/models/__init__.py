@@ -14,6 +14,17 @@ Example:
 from gravitywell.models._auth import Session, SessionResponse
 from gravitywell.models._base import BaseResponse
 from gravitywell.models._dns import BlockingResponse
+from gravitywell.models._history import (
+    ActivityResponse,
+    ActivitySlot,
+    ClientActivityResponse,
+    ClientActivitySlot,
+    DatabaseActivityResponse,
+    DatabaseActivitySlot,
+    DatabaseClientActivityResponse,
+    DatabaseClientActivitySlot,
+    HistoryClient,
+)
 from gravitywell.models._info import ComponentVersion, LocalVersion, VersionResponse, Versions
 from gravitywell.models._stats import (
     ClientSummary,
@@ -46,6 +57,16 @@ __all__ = [
     "BaseResponse",
     # gravitywell.models._dns
     "BlockingResponse",
+    # gravitywell.models._history
+    "ActivityResponse",
+    "ActivitySlot",
+    "ClientActivityResponse",
+    "ClientActivitySlot",
+    "DatabaseActivityResponse",
+    "DatabaseActivitySlot",
+    "DatabaseClientActivityResponse",
+    "DatabaseClientActivitySlot",
+    "HistoryClient",
     # gravitywell.models._info
     "ComponentVersion",
     "LocalVersion",

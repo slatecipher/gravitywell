@@ -19,10 +19,18 @@ def test_package_exports() -> None:
 def test_models_exports() -> None:
     assert sorted(gravitywell.models.__all__) == sorted(
         [
+            "ActivityResponse",
+            "ActivitySlot",
             "BaseResponse",
             "BlockingResponse",
+            "ClientActivityResponse",
+            "ClientActivitySlot",
             "ClientSummary",
             "ComponentVersion",
+            "DatabaseActivityResponse",
+            "DatabaseActivitySlot",
+            "DatabaseClientActivityResponse",
+            "DatabaseClientActivitySlot",
             "DatabaseSummaryResponse",
             "DatabaseTopClient",
             "DatabaseTopClientsResponse",
@@ -30,6 +38,7 @@ def test_models_exports() -> None:
             "DatabaseUpstream",
             "DatabaseUpstreamsResponse",
             "GravitySummary",
+            "HistoryClient",
             "QuerySummary",
             "QueryTypesResponse",
             "RecentBlockedResponse",
