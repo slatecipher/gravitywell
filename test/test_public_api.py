@@ -4,6 +4,9 @@ A change here is a change to the public API.
 """
 
 import importlib.metadata
+import re
+
+import pytest
 
 import gravitywell
 import gravitywell.models
@@ -11,7 +14,9 @@ from gravitywell.models import BaseResponse
 
 
 def test_package_exports() -> None:
-    assert sorted(gravitywell.__all__) == sorted(["__version__", "AsyncPiHole", "PiHole", "PiHoleAuth"])
+    assert sorted(gravitywell.__all__) == sorted(
+        ["__version__", "AsyncPiHole", "PIHOLE_VERSIONS", "PiHole", "PiHoleAuth"]
+    )
     for name in gravitywell.__all__:
         assert hasattr(gravitywell, name), name
 
@@ -199,3 +204,11 @@ def test_mcp_exports() -> None:
 
 def test_version_is_the_installed_one() -> None:
     assert gravitywell.__version__ == importlib.metadata.version("gravitywell")
+
+
+def test_pihole_versions_name_each_component_and_cannot_change() -> None:
+    assert list(gravitywell.PIHOLE_VERSIONS) == ["core", "web", "ftl"]
+    for component in gravitywell.PIHOLE_VERSIONS.values():
+        assert re.fullmatch(r"v6\.\d+(\.\d+)?", component), component
+    with pytest.raises(TypeError):
+        gravitywell.PIHOLE_VERSIONS["ftl"] = "v7.0"  # pyright: ignore[reportIndexIssue]
