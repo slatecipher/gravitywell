@@ -48,7 +48,8 @@ class Logs(Resource, prefix="/logs"):
         Args:
             next_id: `next_id` from an earlier call, to get only the lines
                 written since, for polling: with nothing new, no lines. Leave
-                it out to get every line kept, and when `pid` has changed.
+                it out to get every line kept, and again when a call returns
+                a lower `next_id` than it was given: the log started over.
             lines: How many of the newest lines to return, at least 1. All of
                 them by default.
         """
@@ -67,7 +68,8 @@ class Logs(Resource, prefix="/logs"):
         Args:
             next_id: `next_id` from an earlier call, to get only the lines
                 written since, for polling: with nothing new, no lines. Leave
-                it out to get every line kept, and when `pid` has changed.
+                it out to get every line kept, and again when a call returns
+                a lower `next_id` than it was given: the log started over.
             lines: How many of the newest lines to return, at least 1. All of
                 them by default.
         """
@@ -86,7 +88,8 @@ class Logs(Resource, prefix="/logs"):
         Args:
             next_id: `next_id` from an earlier call, to get only the lines
                 written since, for polling: with nothing new, no lines. Leave
-                it out to get every line kept, and when `pid` has changed.
+                it out to get every line kept, and again when a call returns
+                a lower `next_id` than it was given: the log started over.
             lines: How many of the newest lines to return, at least 1. All of
                 them by default.
         """
@@ -116,7 +119,8 @@ class AsyncLogs(AsyncResource, prefix="/logs"):
         Args:
             next_id: `next_id` from an earlier call, to get only the lines
                 written since, for polling: with nothing new, no lines. Leave
-                it out to get every line kept, and when `pid` has changed.
+                it out to get every line kept, and again when a call returns
+                a lower `next_id` than it was given: the log started over.
             lines: How many of the newest lines to return, at least 1. All of
                 them by default.
         """
@@ -135,7 +139,8 @@ class AsyncLogs(AsyncResource, prefix="/logs"):
         Args:
             next_id: `next_id` from an earlier call, to get only the lines
                 written since, for polling: with nothing new, no lines. Leave
-                it out to get every line kept, and when `pid` has changed.
+                it out to get every line kept, and again when a call returns
+                a lower `next_id` than it was given: the log started over.
             lines: How many of the newest lines to return, at least 1. All of
                 them by default.
         """
@@ -154,7 +159,8 @@ class AsyncLogs(AsyncResource, prefix="/logs"):
         Args:
             next_id: `next_id` from an earlier call, to get only the lines
                 written since, for polling: with nothing new, no lines. Leave
-                it out to get every line kept, and when `pid` has changed.
+                it out to get every line kept, and again when a call returns
+                a lower `next_id` than it was given: the log started over.
             lines: How many of the newest lines to return, at least 1. All of
                 them by default.
         """
