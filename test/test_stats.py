@@ -64,3 +64,72 @@ def test_a_last_update_of_zero_reads_as_unknown(serve: Serve) -> None:
 
     with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(body)) as api:
         assert api.stats.summary().gravity.last_update is None
+
+
+TOP_DOMAINS_BODY = {
+    "domains": [{"domain": "example.com", "count": 8}, {"domain": "github.com", "count": 7}],
+    "total_queries": 43,
+    "blocked_queries": 5,
+    "took": 0.0001,
+}
+TOP_CLIENTS_BODY = {
+    "clients": [{"name": "", "ip": "192.168.1.50", "count": 39}, {"name": "localhost", "ip": "127.0.0.1", "count": 4}],
+    "total_queries": 43,
+    "blocked_queries": 5,
+    "took": 0.0001,
+}
+
+
+def test_top_domains_gets_permitted_domains_by_default(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(TOP_DOMAINS_BODY)) as api:
+        top = api.stats.top_domains()
+
+    assert [(item.domain, item.count) for item in top.domains] == [("example.com", 8), ("github.com", 7)]
+    assert (top.total_queries, top.blocked_queries) == (43, 5)
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/top_domains")
+    assert dict(request.url.params) == {"blocked": "false", "count": "10"}
+
+
+@pytest.mark.anyio
+async def test_async_top_domains_sends_blocked_and_count(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(TOP_DOMAINS_BODY)) as api:
+        top = await api.stats.top_domains(blocked=True, count=2)
+
+    assert top.domains[0].domain == "example.com"
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/top_domains")
+    assert dict(request.url.params) == {"blocked": "true", "count": "2"}
+
+
+def test_top_clients_gets_clients_by_all_queries_by_default(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(TOP_CLIENTS_BODY)) as api:
+        top = api.stats.top_clients()
+
+    assert [(item.ip, item.name, item.count) for item in top.clients] == [
+        ("192.168.1.50", "", 39),
+        ("127.0.0.1", "localhost", 4),
+    ]
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/top_clients")
+    assert dict(request.url.params) == {"blocked": "false", "count": "10"}
+
+
+@pytest.mark.anyio
+async def test_async_top_clients_sends_blocked_and_count(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(TOP_CLIENTS_BODY)) as api:
+        top = await api.stats.top_clients(blocked=True, count=1)
+
+    assert top.clients[0].ip == "192.168.1.50"
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/top_clients")
+    assert dict(request.url.params) == {"blocked": "true", "count": "1"}
+
+
+def test_totals_of_minus_one_read_as_hidden_by_the_privacy_level(serve: Serve) -> None:
+    body = {"domains": [], "total_queries": -1, "blocked_queries": -1, "took": 0.0001}
+
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(body)) as api:
+        top = api.stats.top_domains()
+
+    assert (top.domains, top.total_queries, top.blocked_queries) == ([], None, None)
