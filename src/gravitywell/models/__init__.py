@@ -23,10 +23,18 @@ from gravitywell.models._clients import (
     ConfiguredClient,
 )
 from gravitywell.models._config import (
+    AllowedValue,
+    ChangedSettingsResponse,
     CnameRecord,
     CnameRecordsResponse,
+    ConfigSetting,
+    ConfigSettingsResponse,
     DnsRecord,
     DnsRecordsResponse,
+    ReverseServer,
+    ReverseServersResponse,
+    StaticLease,
+    StaticLeasesResponse,
     UpstreamServersResponse,
 )
 from gravitywell.models._dhcp import DhcpLease, DhcpLeasesResponse
@@ -171,10 +179,18 @@ __all__ = [
     "ClientsResponse",
     "ConfiguredClient",
     # gravitywell.models._config
+    "AllowedValue",
+    "ChangedSettingsResponse",
     "CnameRecord",
     "CnameRecordsResponse",
+    "ConfigSetting",
+    "ConfigSettingsResponse",
     "DnsRecord",
     "DnsRecordsResponse",
+    "ReverseServer",
+    "ReverseServersResponse",
+    "StaticLease",
+    "StaticLeasesResponse",
     "UpstreamServersResponse",
     # gravitywell.models._dhcp
     "DhcpLease",
