@@ -174,3 +174,63 @@ class RecentBlockedResponse(BaseResponse):
         "than once. `hidden` stands for a domain the privacy level hid when it was queried, and the list is empty if "
         "the privacy level hides domains."
     )
+
+
+class DatabaseSummaryResponse(BaseResponse):
+    """Totals of the Pi-hole's queries in a time range of its query database."""
+
+    sum_queries: int = Field(description="Queries in the range.")
+    sum_blocked: int = Field(description="Blocked queries in the range.")
+    percent_blocked: float = Field(description="Share of queries blocked, in percent from 0 to 100, such as `34.5`.")
+    total_clients: int = Field(description="Different clients that sent a query in the range.")
+
+
+class DatabaseTopDomainsResponse(BaseResponse):
+    """The most queried domains in a time range, most queries first."""
+
+    domains: list[TopDomain] = Field(description="Up to `count` domains, most queries first.")
+    total_queries: int = Field(description="All queries in the range.")
+    blocked_queries: int = Field(description="Blocked queries in the range.")
+
+
+class DatabaseTopClient(BaseModel):
+    """A device that queried the Pi-hole, and how many queries it sent."""
+
+    ip: str = Field(description="Its IP address, IPv4 or IPv6, such as `192.168.0.44`.")
+    name: str | None = Field(
+        description="Its hostname, such as `laptop.lan`, or `null` or an empty string if the Pi-hole knows none."
+    )
+    count: int = Field(description="Its queries in the range, of the kind asked for: permitted or blocked.")
+
+
+class DatabaseTopClientsResponse(BaseResponse):
+    """The clients that sent the most queries in a time range, most first."""
+
+    clients: list[DatabaseTopClient] = Field(
+        description="Up to `count` clients, most queries first. The database keeps a client once per hostname it "
+        "had, so an IP address can appear more than once, such as `127.0.0.1` with and without `localhost`."
+    )
+    total_queries: int = Field(description="All queries in the range.")
+    blocked_queries: int = Field(description="Blocked queries in the range.")
+
+
+class DatabaseUpstream(BaseModel):
+    """Where the Pi-hole sent queries in a time range, and how many."""
+
+    ip: str = Field(
+        description="The upstream DNS server's IP address, such as `8.8.4.4`, or `cache` for the queries the Pi-hole "
+        "answered from its cache and `blocklist` for those it blocked."
+    )
+    port: int = Field(description="The server's port, such as `53`, or `-1` for `cache` and `blocklist`.")
+    count: int = Field(description="Queries it handled in the range.")
+
+
+class DatabaseUpstreamsResponse(BaseResponse):
+    """Where a time range's queries went: a server, the cache or blocklist."""
+
+    upstreams: list[DatabaseUpstream] = Field(
+        description="Each upstream server that answered a query in the range, in no particular order, then `cache` "
+        "and `blocklist`. The database keeps no response times."
+    )
+    forwarded_queries: int = Field(description="Queries in the range answered by an upstream server.")
+    total_queries: int = Field(description="All queries in the range.")

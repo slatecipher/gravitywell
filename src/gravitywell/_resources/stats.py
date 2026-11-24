@@ -5,17 +5,120 @@ from typing import Annotated
 from clientx import AsyncResource, Query, Resource, method
 
 from gravitywell.models import (
+    DatabaseSummaryResponse,
+    DatabaseTopClientsResponse,
+    DatabaseTopDomainsResponse,
+    DatabaseUpstreamsResponse,
     QueryTypesResponse,
     RecentBlockedResponse,
     SummaryResponse,
+    TimeRange,
     TopClientsResponse,
     TopDomainsResponse,
     UpstreamsResponse,
 )
 
 
+class StatsDatabase(Resource, prefix="/stats/database"):
+    """Statistics over a time range, from the Pi-hole's query database."""
+
+    @method.get("/summary")
+    def summary(self, time_range: Annotated[TimeRange, Query()]) -> DatabaseSummaryResponse:
+        """Fetch totals of the Pi-hole's queries over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default and gets each one within about a minute, so it can answer
+        questions such as how many queries were blocked last week. For the
+        last 24 hours, the stats summary has more detail. It changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+        """
+        ...
+
+    @method.get("/top_domains")
+    def top_domains(
+        self,
+        time_range: Annotated[TimeRange, Query()],
+        blocked: Annotated[bool, Query()] = False,
+        count: Annotated[int, Query(ge=1)] = 10,
+    ) -> DatabaseTopDomainsResponse:
+        """Fetch the most queried domains over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default. By default it ranks domains by permitted queries, so blocked
+        domains don't appear; pass `blocked=true` to rank them by blocked
+        queries. It changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+            blocked: `true` to rank domains by blocked queries, `false` (the
+                default) by permitted queries.
+            count: How many domains to return, at least 1. 10 by default.
+        """
+        ...
+
+    @method.get("/top_clients")
+    def top_clients(
+        self,
+        time_range: Annotated[TimeRange, Query()],
+        blocked: Annotated[bool, Query()] = False,
+        count: Annotated[int, Query(ge=1)] = 10,
+    ) -> DatabaseTopClientsResponse:
+        """Fetch the clients that sent the most queries over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default. By default it ranks clients by permitted queries (the
+        last-24-hours list counts all of a client's queries instead); pass
+        `blocked=true` to rank them by blocked queries. It changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+            blocked: `true` to rank clients by blocked queries, `false` (the
+                default) by permitted queries.
+            count: How many clients to return, at least 1. 10 by default.
+        """
+        ...
+
+    @method.get("/upstreams")
+    def upstreams(self, time_range: Annotated[TimeRange, Query()]) -> DatabaseUpstreamsResponse:
+        """Fetch where the Pi-hole's queries went over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default: how many queries each upstream DNS server answered, how many
+        came from the cache, and how many were blocked. The database keeps
+        no response times; the last-24-hours upstreams list has them. It
+        changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+        """
+        ...
+
+    @method.get("/query_types")
+    def query_types(self, time_range: Annotated[TimeRange, Query()]) -> QueryTypesResponse:
+        """Fetch the Pi-hole's queries by DNS record type over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default. `A` and `AAAA` are IPv4 and IPv6 address lookups, `PTR`
+        reverse lookups, `HTTPS` HTTPS service records, and so on. It changes
+        nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+        """
+        ...
+
+
 class Stats(Resource, prefix="/stats"):
     """Statistics about the Pi-hole's activity."""
+
+    database = StatsDatabase()
 
     @method.get("/summary")
     def summary(self) -> SummaryResponse:
@@ -117,8 +220,106 @@ class Stats(Resource, prefix="/stats"):
         ...
 
 
+class AsyncStatsDatabase(AsyncResource, prefix="/stats/database"):
+    """Statistics over a time range, from the Pi-hole's query database."""
+
+    @method.get("/summary")
+    async def summary(self, time_range: Annotated[TimeRange, Query()]) -> DatabaseSummaryResponse:
+        """Fetch totals of the Pi-hole's queries over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default and gets each one within about a minute, so it can answer
+        questions such as how many queries were blocked last week. For the
+        last 24 hours, the stats summary has more detail. It changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+        """
+        ...
+
+    @method.get("/top_domains")
+    async def top_domains(
+        self,
+        time_range: Annotated[TimeRange, Query()],
+        blocked: Annotated[bool, Query()] = False,
+        count: Annotated[int, Query(ge=1)] = 10,
+    ) -> DatabaseTopDomainsResponse:
+        """Fetch the most queried domains over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default. By default it ranks domains by permitted queries, so blocked
+        domains don't appear; pass `blocked=true` to rank them by blocked
+        queries. It changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+            blocked: `true` to rank domains by blocked queries, `false` (the
+                default) by permitted queries.
+            count: How many domains to return, at least 1. 10 by default.
+        """
+        ...
+
+    @method.get("/top_clients")
+    async def top_clients(
+        self,
+        time_range: Annotated[TimeRange, Query()],
+        blocked: Annotated[bool, Query()] = False,
+        count: Annotated[int, Query(ge=1)] = 10,
+    ) -> DatabaseTopClientsResponse:
+        """Fetch the clients that sent the most queries over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default. By default it ranks clients by permitted queries (the
+        last-24-hours list counts all of a client's queries instead); pass
+        `blocked=true` to rank them by blocked queries. It changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+            blocked: `true` to rank clients by blocked queries, `false` (the
+                default) by permitted queries.
+            count: How many clients to return, at least 1. 10 by default.
+        """
+        ...
+
+    @method.get("/upstreams")
+    async def upstreams(self, time_range: Annotated[TimeRange, Query()]) -> DatabaseUpstreamsResponse:
+        """Fetch where the Pi-hole's queries went over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default: how many queries each upstream DNS server answered, how many
+        came from the cache, and how many were blocked. The database keeps
+        no response times; the last-24-hours upstreams list has them. It
+        changes nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+        """
+        ...
+
+    @method.get("/query_types")
+    async def query_types(self, time_range: Annotated[TimeRange, Query()]) -> QueryTypesResponse:
+        """Fetch the Pi-hole's queries by DNS record type over a time range.
+
+        It reads the query database, which keeps queries for 91 days by
+        default. `A` and `AAAA` are IPv4 and IPv6 address lookups, `PTR`
+        reverse lookups, `HTTPS` HTTPS service records, and so on. It changes
+        nothing.
+
+        Args:
+            time_range: The range to cover: `start`, and `until`, now by
+                default, both with a timezone.
+        """
+        ...
+
+
 class AsyncStats(AsyncResource, prefix="/stats"):
     """Statistics about the Pi-hole's activity."""
+
+    database = AsyncStatsDatabase()
 
     @method.get("/summary")
     async def summary(self) -> SummaryResponse:
