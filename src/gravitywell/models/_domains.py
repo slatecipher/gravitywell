@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from gravitywell.models._base import GROUP_IDS, BaseResponse
+from gravitywell.models._base import GROUP_IDS, BaseResponse, ProcessedItems
 
 # What a rule does, and what it matches. Plain aliases, not `type` statements,
 # so JSON schemas write the enums in place.
@@ -41,26 +41,6 @@ class DomainRuleKey(BaseModel):
     domain: str = Field(serialization_alias="item", description="The rule's domain, or its regex, as `list` shows it.")
     type: RuleType = Field(description="The rule's type: `allow` or `deny`.")
     kind: RuleKind = Field(description="The rule's kind: `exact` or `regex`.")
-
-
-class ProcessedItem(BaseModel):
-    """An item a write saved."""
-
-    item: str = Field(description="The item, such as a domain.")
-
-
-class ProcessingError(BaseModel):
-    """An item a write couldn't save, and why."""
-
-    item: str = Field(description="The item, such as a domain.")
-    error: str = Field(description="Why, such as `The item is already present`.")
-
-
-class ProcessedItems(BaseModel):
-    """Which items a write saved, and which it couldn't."""
-
-    success: list[ProcessedItem] = Field(description="The items saved.")
-    errors: list[ProcessingError] = Field(description="The items not saved, with the reason for each.")
 
 
 class DomainsResponse(BaseResponse):

@@ -33,3 +33,23 @@ class BaseResponse(BaseModel):
     """The fields every Pi-hole response body has."""
 
     took: float = Field(description="Seconds the Pi-hole took to process the request.")
+
+
+class ProcessedItem(BaseModel):
+    """An item a write saved."""
+
+    item: str = Field(description="The item, such as a domain or a list's URL.")
+
+
+class ProcessingError(BaseModel):
+    """An item a write couldn't save, and why."""
+
+    item: str = Field(description="The item, such as a domain or a list's URL.")
+    error: str = Field(description="Why, such as `The item is already present`.")
+
+
+class ProcessedItems(BaseModel):
+    """Which items a write saved, and which it couldn't."""
+
+    success: list[ProcessedItem] = Field(description="The items saved.")
+    errors: list[ProcessingError] = Field(description="The items not saved, with the reason for each.")
