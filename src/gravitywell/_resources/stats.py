@@ -19,7 +19,7 @@ from gravitywell.models import (
 )
 
 
-class StatsDatabase(Resource, prefix="/stats/database"):
+class StatsDatabase(Resource, prefix="/stats/database", tags=["stats"]):
     """Statistics over a time range, from the Pi-hole's query database."""
 
     @method.get("/summary")
@@ -115,7 +115,7 @@ class StatsDatabase(Resource, prefix="/stats/database"):
         ...
 
 
-class Stats(Resource, prefix="/stats"):
+class Stats(Resource, prefix="/stats", tags=["stats"]):
     """Statistics about the Pi-hole's activity."""
 
     database = StatsDatabase()
@@ -220,7 +220,7 @@ class Stats(Resource, prefix="/stats"):
         ...
 
 
-class AsyncStatsDatabase(AsyncResource, prefix="/stats/database"):
+class AsyncStatsDatabase(AsyncResource, prefix="/stats/database", tags=["stats"]):
     """Statistics over a time range, from the Pi-hole's query database."""
 
     @method.get("/summary")
@@ -316,7 +316,7 @@ class AsyncStatsDatabase(AsyncResource, prefix="/stats/database"):
         ...
 
 
-class AsyncStats(AsyncResource, prefix="/stats"):
+class AsyncStats(AsyncResource, prefix="/stats", tags=["stats"]):
     """Statistics about the Pi-hole's activity."""
 
     database = AsyncStatsDatabase()

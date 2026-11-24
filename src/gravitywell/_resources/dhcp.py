@@ -5,7 +5,7 @@ from clientx import AsyncResource, Resource, method
 from gravitywell.models import DhcpLeasesResponse
 
 
-class Dhcp(Resource, prefix="/dhcp"):
+class Dhcp(Resource, prefix="/dhcp", tags=["dhcp"]):
     """The Pi-hole's DHCP server and its leases."""
 
     @method.get("/leases")
@@ -33,7 +33,7 @@ class Dhcp(Resource, prefix="/dhcp"):
         ...
 
 
-class AsyncDhcp(AsyncResource, prefix="/dhcp"):
+class AsyncDhcp(AsyncResource, prefix="/dhcp", tags=["dhcp"]):
     """The Pi-hole's DHCP server and its leases."""
 
     @method.get("/leases")

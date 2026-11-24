@@ -8,7 +8,7 @@ from clientx import AsyncResource, Resource, method
 from gravitywell.models import ActiveSessionsResponse
 
 
-class Sessions(Resource, prefix="/auth"):
+class Sessions(Resource, prefix="/auth", tags=["sessions"]):
     """The sessions logged in to the Pi-hole's API."""
 
     @method.delete("/session/{session_id}")
@@ -45,7 +45,7 @@ class Sessions(Resource, prefix="/auth"):
         ...
 
 
-class AsyncSessions(AsyncResource, prefix="/auth"):
+class AsyncSessions(AsyncResource, prefix="/auth", tags=["sessions"]):
     """The sessions logged in to the Pi-hole's API."""
 
     @method.delete("/session/{session_id}")

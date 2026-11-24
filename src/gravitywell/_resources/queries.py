@@ -14,7 +14,7 @@ from gravitywell.models import (
 )
 
 
-class Queries(Resource, prefix="/queries"):
+class Queries(Resource, prefix="/queries", tags=["queries"]):
     """The Pi-hole's query log, one entry per DNS query."""
 
     @method.get()
@@ -96,7 +96,7 @@ class Queries(Resource, prefix="/queries"):
         ...
 
 
-class AsyncQueries(AsyncResource, prefix="/queries"):
+class AsyncQueries(AsyncResource, prefix="/queries", tags=["queries"]):
     """The Pi-hole's query log, one entry per DNS query."""
 
     @method.get()

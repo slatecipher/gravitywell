@@ -19,7 +19,7 @@ from gravitywell.models import (
 )
 
 
-class Info(Resource, prefix="/info"):
+class Info(Resource, prefix="/info", tags=["info"]):
     """Information about the Pi-hole: its versions, machine and DNS server."""
 
     @method.get("/messages")
@@ -134,7 +134,7 @@ class Info(Resource, prefix="/info"):
         ...
 
 
-class AsyncInfo(AsyncResource, prefix="/info"):
+class AsyncInfo(AsyncResource, prefix="/info", tags=["info"]):
     """Information about the Pi-hole: its versions, machine and DNS server."""
 
     @method.get("/messages")

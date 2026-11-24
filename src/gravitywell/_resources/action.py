@@ -28,7 +28,7 @@ def _gravity_update(response: Response) -> GravityUpdate:
     return GravityUpdate(output=output, succeeded=output.rsplit("\n", 1)[-1] != "Gravity failed")
 
 
-class Action(Resource, prefix="/action"):
+class Action(Resource, prefix="/action", tags=["action"]):
     """Actions on the Pi-hole: update gravity, restart FTL, and flush data."""
 
     @method.post(
@@ -89,7 +89,7 @@ class Action(Resource, prefix="/action"):
         ...
 
 
-class AsyncAction(AsyncResource, prefix="/action"):
+class AsyncAction(AsyncResource, prefix="/action", tags=["action"]):
     """Actions on the Pi-hole: update gravity, restart FTL, and flush data."""
 
     @method.post(

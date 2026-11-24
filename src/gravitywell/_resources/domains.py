@@ -12,7 +12,7 @@ from gravitywell.models import ChangedDomainsResponse, DomainRuleKey, DomainsRes
 _BATCH_DELETE = ToolOptions(destructive=True, idempotent=True)
 
 
-class DomainsBatch(Resource):
+class DomainsBatch(Resource, tags=["domains"]):
     """Change several domain rules at once."""
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
@@ -31,7 +31,7 @@ class DomainsBatch(Resource):
         ...
 
 
-class Domains(Resource, prefix="/domains"):
+class Domains(Resource, prefix="/domains", tags=["domains"]):
     """The Pi-hole's allow and deny rules for domains."""
 
     batch = DomainsBatch()
@@ -180,7 +180,7 @@ class Domains(Resource, prefix="/domains"):
         ...
 
 
-class AsyncDomainsBatch(AsyncResource):
+class AsyncDomainsBatch(AsyncResource, tags=["domains"]):
     """Change several domain rules at once."""
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
@@ -199,7 +199,7 @@ class AsyncDomainsBatch(AsyncResource):
         ...
 
 
-class AsyncDomains(AsyncResource, prefix="/domains"):
+class AsyncDomains(AsyncResource, prefix="/domains", tags=["domains"]):
     """The Pi-hole's allow and deny rules for domains."""
 
     batch = AsyncDomainsBatch()

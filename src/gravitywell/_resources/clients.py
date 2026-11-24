@@ -12,7 +12,7 @@ from gravitywell.models import ChangedClientsResponse, ClientKey, ClientsRespons
 _BATCH_DELETE = ToolOptions(destructive=True, idempotent=True)
 
 
-class ClientsBatch(Resource):
+class ClientsBatch(Resource, tags=["clients"]):
     """Change several clients at once."""
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
@@ -31,7 +31,7 @@ class ClientsBatch(Resource):
         ...
 
 
-class Clients(Resource, prefix="/clients"):
+class Clients(Resource, prefix="/clients", tags=["clients"]):
     """The clients the Pi-hole recognizes, and the groups they're in."""
 
     batch = ClientsBatch()
@@ -141,7 +141,7 @@ class Clients(Resource, prefix="/clients"):
         ...
 
 
-class AsyncClientsBatch(AsyncResource):
+class AsyncClientsBatch(AsyncResource, tags=["clients"]):
     """Change several clients at once."""
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
@@ -160,7 +160,7 @@ class AsyncClientsBatch(AsyncResource):
         ...
 
 
-class AsyncClients(AsyncResource, prefix="/clients"):
+class AsyncClients(AsyncResource, prefix="/clients", tags=["clients"]):
     """The clients the Pi-hole recognizes, and the groups they're in."""
 
     batch = AsyncClientsBatch()
