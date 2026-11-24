@@ -4,8 +4,8 @@ import ssl
 from types import TracebackType
 from typing import Any, cast
 
-import httpx2
 from clientx import AsyncClientX, ClientX
+from httpx2 import URL, AsyncBaseTransport, BaseTransport
 
 from gravitywell._auth import PiHoleAuth
 from gravitywell._resources.info import AsyncInfo, Info
@@ -15,7 +15,7 @@ from gravitywell._version import __version__
 # the clients override all four to log out of a `PiHoleAuth` session.
 
 
-class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
+class _BasePiHole[TransportT: BaseTransport | AsyncBaseTransport]:
     """The constructor `PiHole` and `AsyncPiHole` share, which requires `auth`.
 
     `TransportT` is the client's kind of transport, sync or async.
@@ -23,7 +23,7 @@ class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
 
     def __init__(
         self,
-        base_url: httpx2.URL | str,
+        base_url: URL | str,
         *,
         auth: PiHoleAuth,
         verify: ssl.SSLContext | bool = True,
@@ -35,9 +35,9 @@ class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
         replies into Pydantic models. Its attributes group the endpoints by
         API area, such as `api.info`, and each endpoint returns a model of its
         whole response body, from `gravitywell.models`. A 4xx or 5xx response
-        raises `httpx2.HTTPStatusError`.
+        raises `HTTPStatusError`.
 
-        It's an `httpx2.Client`, or an `httpx2.AsyncClient` for `AsyncPiHole`,
+        It's an `Client`, or an `AsyncClient` for `AsyncPiHole`,
         built with ClientX. It logs in on its first request and reuses that
         session. Close it when you're done, by leaving its `with` block or
         calling `close()` (`aclose()` when async), to log out: a Pi-hole
@@ -52,15 +52,17 @@ class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
                 `ssl.SSLContext` that trusts Pi-hole's self-signed one, or
                 `False` to skip the check.
             transport: Sends the requests in place of the network, such as an
-                `httpx2.MockTransport` in tests. `AsyncPiHole` takes an async
+                `MockTransport` in tests. `AsyncPiHole` takes an async
                 one.
         """
         # `super()` is `ClientX` or `AsyncClientX`, next in the subclass's MRO,
         # which pyright can't see from this class.
+        base_url = URL(base_url).copy_with(path="/api")
+
         cast("Any", super()).__init__(base_url, auth=auth, verify=verify, transport=transport)
 
 
-class PiHole(_BasePiHole[httpx2.BaseTransport], ClientX, user_agent=f"gravitywell/{__version__}"):
+class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__version__}"):
     """A client for a Pi-hole's v6 REST API.
 
     Closing the client logs out of its session.
@@ -90,7 +92,7 @@ class PiHole(_BasePiHole[httpx2.BaseTransport], ClientX, user_agent=f"gravitywel
             self.auth.log_out(self)
 
 
-class AsyncPiHole(_BasePiHole[httpx2.AsyncBaseTransport], AsyncClientX, user_agent=f"gravitywell/{__version__}"):
+class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gravitywell/{__version__}"):
     """The async version of `PiHole`."""
 
     info = AsyncInfo()
