@@ -15,6 +15,7 @@ from gravitywell.models._auth import Session, SessionResponse
 from gravitywell.models._base import BaseResponse
 from gravitywell.models._dns import BlockingResponse
 from gravitywell.models._info import ComponentVersion, LocalVersion, VersionResponse, Versions
+from gravitywell.models._stats import ClientSummary, GravitySummary, QuerySummary, SummaryResponse
 
 __all__ = [
     # gravitywell.models._auth
@@ -29,4 +30,9 @@ __all__ = [
     "LocalVersion",
     "VersionResponse",
     "Versions",
+    # gravitywell.models._stats
+    "ClientSummary",
+    "GravitySummary",
+    "QuerySummary",
+    "SummaryResponse",
 ]
