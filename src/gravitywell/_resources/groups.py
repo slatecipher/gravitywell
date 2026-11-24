@@ -1,36 +1,60 @@
 """The group management endpoints, under `/groups`."""
 
+from collections.abc import Iterable
 from typing import Annotated
 
-from clientx import AsyncResource, Json, Resource, method
-from clientx.tools import ToolOptions
+from clientx import ArgumentError, AsyncResource, Json, Resource, Response, method
+from clientx.tools import tool
 
-from gravitywell.models import ChangedGroupsResponse, GroupKey, GroupsResponse
+from gravitywell.models import ChangedGroupsResponse, Group, GroupKey, GroupsResponse
 
-# A POST, so AI tools would treat it as neither: it deletes, and deleting the
-# same groups again changes nothing more.
-_BATCH_DELETE = ToolOptions(destructive=True, idempotent=True)
+
+def _refuse_default_group(groups: Iterable[Group], *, parameter: str) -> None:
+    """Raise `ArgumentError` if one of `groups` is the Default group.
+
+    Deleting it cascades through Pi-hole's database: every rule, list and
+    client loses its membership in it, and Pi-hole re-creates it empty. It's
+    found by its ID, `0`, since it can be renamed.
+    """
+    if any(group.id == 0 for group in groups):
+        msg = (
+            "Refused to delete the Default group, ID 0: Pi-hole would re-create it empty, so every rule, list and "
+            "client in it would stop applying. To stop it applying, disable it with an update instead."
+        )
+        raise ArgumentError(msg, parameter=parameter)
 
 
 class GroupsBatch(Resource):
     """Change several groups at once."""
 
+    # Raw requests for `delete` below, which checks for the Default group
+    # first. `-> Response` keeps them out of AI tools, so a model can't go
+    # around that check.
+    @method.get("/groups")
+    def _groups(self) -> Response: ...
+
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
     # (ClientX #173).
-    @method.post("/groups:batchDelete", tool_options=_BATCH_DELETE)
-    def delete(self, groups: Annotated[list[GroupKey], Json()]) -> None:
+    @method.post("/groups:batchDelete")
+    def _delete(self, groups: Annotated[list[GroupKey], Json()]) -> Response: ...
+
+    @tool(destructive=True, idempotent=True)
+    def delete(self, groups: list[GroupKey]) -> None:
         """Delete several groups at once.
 
-        Their rules, lists and clients stay, but no longer belong to them.
-        Don't delete the Default group, ID `0`: Pi-hole re-creates it, but
-        empty, so every rule, list and client in it stops applying until it's
-        added back. Groups that don't exist are skipped, but if none of them
-        exists, it answers with an error (404).
+        Their rules, lists and clients stay, but no longer belong to them. It
+        refuses to delete the Default group, ID `0`, under any name, and then
+        deletes none of them: see the single delete. Groups that don't exist
+        are skipped, but if none of them exists, it answers with an error
+        (404).
 
         Args:
             groups: The groups to delete, each by its name.
         """
-        ...
+        names = {key.name for key in groups}
+        current = GroupsResponse.model_validate_json(self._groups().content).groups
+        _refuse_default_group([group for group in current if group.name in names], parameter="groups")
+        self._delete(groups)
 
 
 class Groups(Resource, prefix="/groups"):
@@ -117,19 +141,28 @@ class Groups(Resource, prefix="/groups"):
         """
         ...
 
+    # The raw request for `delete` below, which checks for the Default group
+    # first. `-> Response` keeps it out of AI tools, so a model can't go
+    # around that check.
     @method.delete("/{name}")
+    def _delete(self, name: str) -> Response: ...
+
+    @tool(destructive=True, idempotent=True)
     def delete(self, name: str) -> None:
         """Delete a group.
 
-        Its rules, lists and clients stay, but no longer belong to it. Don't
-        delete the Default group, ID `0`: Pi-hole re-creates it, but empty, so
-        every rule, list and client in it stops applying until it's added
-        back. A group that doesn't exist answers with an error (404).
+        Its rules, lists and clients stay, but no longer belong to it. It
+        refuses to delete the Default group, ID `0`, under any name: Pi-hole
+        would re-create it empty, so every rule, list and client in it would
+        stop applying. To stop the Default group applying, disable it with an
+        update instead. A group that doesn't exist answers with an error
+        (404).
 
         Args:
             name: The group's name, such as `Kids`.
         """
-        ...
+        _refuse_default_group(self.get(name).groups, parameter="name")
+        self._delete(name)
 
     # Last in the class: a method named `list` hides the builtin for the rest
     # of the class body.
@@ -148,22 +181,34 @@ class Groups(Resource, prefix="/groups"):
 class AsyncGroupsBatch(AsyncResource):
     """Change several groups at once."""
 
+    # Raw requests for `delete` below, which checks for the Default group
+    # first. `-> Response` keeps them out of AI tools, so a model can't go
+    # around that check.
+    @method.get("/groups")
+    async def _groups(self) -> Response: ...
+
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
     # (ClientX #173).
-    @method.post("/groups:batchDelete", tool_options=_BATCH_DELETE)
-    async def delete(self, groups: Annotated[list[GroupKey], Json()]) -> None:
+    @method.post("/groups:batchDelete")
+    async def _delete(self, groups: Annotated[list[GroupKey], Json()]) -> Response: ...
+
+    @tool(destructive=True, idempotent=True)
+    async def delete(self, groups: list[GroupKey]) -> None:
         """Delete several groups at once.
 
-        Their rules, lists and clients stay, but no longer belong to them.
-        Don't delete the Default group, ID `0`: Pi-hole re-creates it, but
-        empty, so every rule, list and client in it stops applying until it's
-        added back. Groups that don't exist are skipped, but if none of them
-        exists, it answers with an error (404).
+        Their rules, lists and clients stay, but no longer belong to them. It
+        refuses to delete the Default group, ID `0`, under any name, and then
+        deletes none of them: see the single delete. Groups that don't exist
+        are skipped, but if none of them exists, it answers with an error
+        (404).
 
         Args:
             groups: The groups to delete, each by its name.
         """
-        ...
+        names = {key.name for key in groups}
+        current = GroupsResponse.model_validate_json((await self._groups()).content).groups
+        _refuse_default_group([group for group in current if group.name in names], parameter="groups")
+        await self._delete(groups)
 
 
 class AsyncGroups(AsyncResource, prefix="/groups"):
@@ -250,19 +295,28 @@ class AsyncGroups(AsyncResource, prefix="/groups"):
         """
         ...
 
+    # The raw request for `delete` below, which checks for the Default group
+    # first. `-> Response` keeps it out of AI tools, so a model can't go
+    # around that check.
     @method.delete("/{name}")
+    async def _delete(self, name: str) -> Response: ...
+
+    @tool(destructive=True, idempotent=True)
     async def delete(self, name: str) -> None:
         """Delete a group.
 
-        Its rules, lists and clients stay, but no longer belong to it. Don't
-        delete the Default group, ID `0`: Pi-hole re-creates it, but empty, so
-        every rule, list and client in it stops applying until it's added
-        back. A group that doesn't exist answers with an error (404).
+        Its rules, lists and clients stay, but no longer belong to it. It
+        refuses to delete the Default group, ID `0`, under any name: Pi-hole
+        would re-create it empty, so every rule, list and client in it would
+        stop applying. To stop the Default group applying, disable it with an
+        update instead. A group that doesn't exist answers with an error
+        (404).
 
         Args:
             name: The group's name, such as `Kids`.
         """
-        ...
+        _refuse_default_group((await self.get(name)).groups, parameter="name")
+        await self._delete(name)
 
     # Last in the class: a method named `list` hides the builtin for the rest
     # of the class body.
