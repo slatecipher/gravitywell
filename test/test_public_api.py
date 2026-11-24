@@ -90,6 +90,8 @@ def test_models_exports() -> None:
             "ListMatchCounts",
             "ListType",
             "ListsResponse",
+            "LogLine",
+            "LogResponse",
             "LocalVersion",
             "LoggedQuery",
             "MemoryUsage",

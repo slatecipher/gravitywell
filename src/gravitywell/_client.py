@@ -16,6 +16,7 @@ from gravitywell._resources.groups import AsyncGroups, Groups
 from gravitywell._resources.history import AsyncHistory, History
 from gravitywell._resources.info import AsyncInfo, Info
 from gravitywell._resources.lists import AsyncLists, Lists
+from gravitywell._resources.logs import AsyncLogs, Logs
 from gravitywell._resources.network import AsyncNetwork, Network
 from gravitywell._resources.queries import AsyncQueries, Queries
 from gravitywell._resources.search import AsyncSearch, Search
@@ -88,6 +89,7 @@ class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__ve
     history = History()
     info = Info()
     lists = Lists()
+    logs = Logs()
     network = Network()
     queries = Queries()
     search = Search()
@@ -126,6 +128,7 @@ class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gr
     history = AsyncHistory()
     info = AsyncInfo()
     lists = AsyncLists()
+    logs = AsyncLogs()
     network = AsyncNetwork()
     queries = AsyncQueries()
     search = AsyncSearch()
