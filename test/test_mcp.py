@@ -67,10 +67,15 @@ async def test_areas_keep_only_their_tools(serve: Serve) -> None:
 
 
 def test_every_tool_is_tagged_with_its_area_alone() -> None:
-    # `--areas` keeps a tool by its first tag: the resource it's mounted as.
+    # `--areas` keeps a tool by its first tag: the resource it's mounted as, or
+    # `insights` for the tools on the client itself, which span areas.
     tools = list_tools(AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD)))
+    insights = {"explain_domain", "explain_client", "check_health"}
 
-    assert [(tool.name, tool.tags) for tool in tools if tool.tags != (tool.name.split("_")[0],)] == []
+    def area(name: str) -> str:
+        return "insights" if name in insights else name.split("_")[0]
+
+    assert [(tool.name, tool.tags) for tool in tools if tool.tags != (area(tool.name),)] == []
 
 
 def test_an_unknown_area_is_refused_with_the_known_ones() -> None:

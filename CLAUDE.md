@@ -27,6 +27,7 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 - `_resources/`: one module per API area (`_resources/info.py`), holding the area's sync `Resource` and its async `AsyncResource` side by side. Private: callers reach them as `api.info`.
 - `_auth.py`: `PiHoleAuth`, an `httpx2.Auth` that logs in, sends the session, logs in again once after a 401, and logs out (`log_out`, `alog_out`) when a client closes.
 - `_client.py`: `PiHole` and `AsyncPiHole`, which mount one resource per area and share `_BasePiHole`'s constructor: the Pi-hole's URL, a required `auth=` (`PiHoleAuth`), `verify=` and `transport=`, not all of ClientX's arguments. The top-level `gravitywell` namespace exports only the clients, the auth and `__version__`.
+- `_insights.py`: the logic of the insights tools, `explain_domain`, `explain_client` and `check_health`, which answer in one call what takes several endpoints. They're `@tool` methods on `PiHole` and `AsyncPiHole` themselves, as a ClientX resource can't call another, tagged `insights` and read-only: the methods make the requests, sync or async, and `_insights.py` builds the answer from the replies.
 - `mcp.py`: the public `gravitywell.mcp` module, an MCP server on FastMCP through `clientx.fastmcp`, in the `mcp` extra: `create_server()` and the `gravitywell-mcp` command (click). It registers the read-only tools unless allowed, by hint, and the areas asked for, by tag; the password comes from `PIHOLE_PASSWORD` only, in the environment or a `--env-file`, never an option. The server closes its client, logging out, when it stops.
 - Tests: one file per API area (`test_info.py`); `test_pi_hole.py` covers the client classes themselves, and `test_public_api.py` pins the exports of `gravitywell` and `gravitywell.models`.
 
@@ -64,6 +65,7 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 - Tests never reach the network: requests go through `httpx2.MockTransport`. Run against a real Pi-hole only when asked, with the password from `PIHOLE_PASSWORD`; never write a password into code, tests or docs.
 - pytest runs in strict mode and `importlib` import mode, so test modules can't import each other: shared helpers are fixtures in `conftest.py`. Async tests use anyio (`@pytest.mark.anyio`), on asyncio only: `conftest.py`'s `anyio_backend` picks it, since anyio 4.10, the lowest version allowed, also runs them on trio, which isn't installed.
 - Endpoint tests use `conftest.py`'s `serve` and `sent` fixtures: `serve(body)` makes a transport that answers `PiHoleAuth`'s login and logout, and every other request with `body`, recorded in `sent`. Name its type in the module: `type Serve = Callable[[object], httpx2.MockTransport]`.
+- A tool that calls several endpoints is tested with `route(bodies)`, which answers each path with its own body: `type Route = Callable[[Mapping[str, object]], httpx2.MockTransport]`.
 - One test per rule, not per branch.
 
 ## Conventions

@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 
 import httpx2
 import pytest
@@ -39,6 +39,29 @@ def serve(sent: list[httpx2.Request]) -> Callable[[object], httpx2.MockTransport
             if isinstance(body, httpx2.Response):
                 return body
             return httpx2.Response(200, json=body)
+
+        return httpx2.MockTransport(handler)
+
+    return transport
+
+
+@pytest.fixture
+def route(sent: list[httpx2.Request]) -> Callable[[Mapping[str, object]], httpx2.MockTransport]:
+    """Make transports that answer each request by its path.
+
+    `route({"/api/dns/blocking": body, ...})` answers each login and logout,
+    and every other request with the JSON body for its path, and records the
+    request in `sent`. A path it has no body for fails the test. Test modules
+    name the type: `type Route = Callable[[Mapping[str, object]],
+    MockTransport]`.
+    """
+
+    def transport(bodies: Mapping[str, object]) -> httpx2.MockTransport:
+        def handler(request: httpx2.Request) -> httpx2.Response:
+            if request.url.path == "/api/auth":
+                return httpx2.Response(200, json=SESSION_BODY)
+            sent.append(request)
+            return httpx2.Response(200, json=bodies[request.url.path])
 
         return httpx2.MockTransport(handler)
 
