@@ -48,7 +48,7 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 ## Tests
 
 - Tests never reach the network: requests go through `httpx2.MockTransport`. Run against a real Pi-hole only when asked, with the password from `PIHOLE_PASSWORD`; never write a password into code, tests or docs.
-- pytest runs in strict mode and `importlib` import mode, so test modules can't import each other: shared helpers are fixtures in `conftest.py`. Async tests use anyio (`@pytest.mark.anyio`).
+- pytest runs in strict mode and `importlib` import mode, so test modules can't import each other: shared helpers are fixtures in `conftest.py`. Async tests use anyio (`@pytest.mark.anyio`), on asyncio only: `conftest.py`'s `anyio_backend` picks it, since anyio 4.10, the lowest version allowed, also runs them on trio, which isn't installed.
 - One test per rule, not per branch.
 
 ## Conventions
