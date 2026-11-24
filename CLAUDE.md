@@ -25,7 +25,8 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 
 - `models/`: the Pydantic models of request and response bodies, one private module per API area (`models/_info.py`), all re-exported from `gravitywell.models`, the one public path for a model. Model names are unique across areas. Models never import ClientX.
 - `_resources/`: one module per API area (`_resources/info.py`), holding the area's sync `Resource` and its async `AsyncResource` side by side. Private: callers reach them as `api.info`.
-- `_client.py`: `PiHole` and `AsyncPiHole`, which mount one resource per area. The top-level `gravitywell` namespace exports only the clients (and later the auth) and `__version__`.
+- `_auth.py`: `PiHoleAuth`, an `httpx2.Auth` that logs in, sends the session, logs in again once after a 401, and logs out (`log_out`, `alog_out`) when a client closes.
+- `_client.py`: `PiHole` and `AsyncPiHole`, which mount one resource per area and share `_BasePiHole`'s constructor: the Pi-hole's URL, a required `auth=` (`PiHoleAuth`), `verify=` and `transport=`, not all of ClientX's arguments. The top-level `gravitywell` namespace exports only the clients, the auth and `__version__`.
 - Tests: one file per API area (`test_info.py`); `test_public_api.py` pins the exports of `gravitywell` and `gravitywell.models`.
 
 ## ClientX
@@ -33,14 +34,15 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 Read ClientX from its public repo, as an outside user would: its [`llms.txt`](https://github.com/slatecipher/ClientX/blob/mainline/llms.txt) before writing endpoints, the [guide](https://github.com/slatecipher/ClientX/tree/mainline/docs) for each feature, and its source when the docs don't answer. When ClientX makes something awkward, say so before working around it: gravitywell doubles as ClientX's first real client, and a ClientX issue is often the better fix.
 
 - Write each sync endpoint on a `Resource` and its async twin on an `AsyncResource`, in the same change, so they never drift.
-- Put `/api` in the base URL; resource prefixes are absolute (`Resource(prefix="/stats")`).
+- The base URL is the Pi-hole's own (`http://pi.hole`), without `/api`: put `/api` in each resource's prefix (`Resource(prefix="/api/stats")`). `PiHoleAuth` logs in at `/api/auth` on the requests' host.
 - An endpoint returns a model of its whole response body, named `<Endpoint>Response` (`VersionResponse`), with no `decoder=` to unwrap Pi-hole's `{"version": ...}` envelopes: unwrapping would drop siblings such as `processed`. Each one extends `BaseResponse` (`models/_base.py`), which holds `took`, the field every Pi-hole response has. Model only the fields used; Pydantic ignores the rest.
-- ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
+- ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/api/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
 
 ## Pi-hole
 
 - Send the session in the `X-FTL-SID` header, never as the `sid` query parameter: httpx2 logs full URLs at `INFO`.
-- Pi-hole limits concurrent sessions: log in once per client, reuse the session, log in again only after a 401.
+- Pi-hole limits concurrent sessions: log in once per client, reuse the session, log in again only after a 401, and log out on close. httpx2's `__exit__` doesn't call `close()` (nor `__aexit__` `aclose()`), so the clients override all four.
+- A Pi-hole with no password answers a login with a `null` session ID: send no `X-FTL-SID` header then.
 - Brand rules for third-party apps: never call gravitywell "official" or suggest Pi-hole makes or supports it; use "Pi-hole" only to say what it works with; no Pi-hole logo or a lookalike.
 
 ## Tests

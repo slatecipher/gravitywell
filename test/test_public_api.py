@@ -11,7 +11,7 @@ from gravitywell.models import BaseResponse
 
 
 def test_package_exports() -> None:
-    assert sorted(gravitywell.__all__) == sorted(["__version__", "AsyncPiHole", "PiHole"])
+    assert sorted(gravitywell.__all__) == sorted(["__version__", "AsyncPiHole", "PiHole", "PiHoleAuth"])
     for name in gravitywell.__all__:
         assert hasattr(gravitywell, name), name
 
@@ -21,6 +21,8 @@ def test_models_exports() -> None:
         [
             "BaseResponse",
             "ComponentVersion",
+            "Session",
+            "SessionResponse",
             "LocalVersion",
             "VersionResponse",
             "Versions",
