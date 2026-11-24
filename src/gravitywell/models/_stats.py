@@ -5,12 +5,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, Field
 
-from gravitywell.models._base import BaseResponse
-
-
-def _zero_is_none(value: object) -> object:
-    # Pi-hole sends a Unix time of 0 when it doesn't know the time.
-    return None if value == 0 else value
+from gravitywell.models._base import QUERY_STATUSES, REPLY_TYPES, BaseResponse, zero_as_none
 
 
 def _minus_one_is_none(value: object) -> object:
@@ -38,20 +33,8 @@ class QuerySummary(BaseModel):
     cached: int = Field(description="Queries answered from the cache or the Pi-hole's own configuration.")
     frequency: float = Field(description="Queries per second, averaged over the last 30 seconds.")
     types: dict[str, int] = Field(description=_QUERY_TYPES)
-    status: dict[str, int] = Field(
-        description="Queries by what the Pi-hole did with them. Blocked: `GRAVITY` (on a blocklist), `REGEX` and "
-        "`DENYLIST` (by a domain rule), `GRAVITY_CNAME`, `REGEX_CNAME` and `DENYLIST_CNAME` (the same, found in a "
-        "CNAME chain), `EXTERNAL_BLOCKED_IP`, `EXTERNAL_BLOCKED_NULL`, `EXTERNAL_BLOCKED_NXRA` and "
-        "`EXTERNAL_BLOCKED_EDE15` (blocked by the upstream server), `SPECIAL_DOMAIN` and `DBBUSY` (the blocklist "
-        "database was busy). Not blocked: `FORWARDED`, `CACHE`, `CACHE_STALE`, `RETRIED`, `RETRIED_DNSSEC`, "
-        "`IN_PROGRESS` and `UNKNOWN`."
-    )
-    replies: dict[str, int] = Field(
-        description="Replies by kind: `IP` (an address), `NXDOMAIN` (no such domain), `NODATA` (no record of that "
-        "type), `CNAME`, `DOMAIN` (a name, such as a reverse lookup's), `BLOB` (other record data, such as a `TXT`, "
-        "`MX` or `HTTPS` answer), `SERVFAIL`, `REFUSED`, `NOTIMP`, `DNSSEC`, `RRNAME`, `OTHER`, `NONE` (not answered "
-        "yet) and `UNKNOWN`."
-    )
+    status: dict[str, int] = Field(description="Queries by what the Pi-hole did with them. " + QUERY_STATUSES)
+    replies: dict[str, int] = Field(description="Replies by kind: " + REPLY_TYPES)
 
 
 class ClientSummary(BaseModel):
@@ -65,7 +48,7 @@ class GravitySummary(BaseModel):
     """The Pi-hole's blocklists, combined into its gravity database."""
 
     domains_being_blocked: int = Field(description="Domains on the blocklists.")
-    last_update: Annotated[datetime | None, BeforeValidator(_zero_is_none)] = Field(
+    last_update: Annotated[datetime | None, BeforeValidator(zero_as_none)] = Field(
         description="When the blocklists were last updated, in UTC, or `null` if the Pi-hole doesn't know."
     )
 

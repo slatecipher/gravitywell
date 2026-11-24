@@ -27,10 +27,10 @@ _UnixTime = Annotated[datetime, AfterValidator(_require_timezone), PlainSerializ
 
 
 class TimeRange(BaseModel):
-    """A time range in the Pi-hole's query database.
+    """A time range of the Pi-hole's queries, from `start` to `until`.
 
-    The database keeps queries for 91 days by default, and gets each one
-    within about a minute. Both times need a timezone.
+    Both times need a timezone. The query database keeps queries for 91 days
+    by default, and gets each one within about a minute.
     """
 
     start: _UnixTime = Field(

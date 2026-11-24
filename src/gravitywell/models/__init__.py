@@ -26,6 +26,18 @@ from gravitywell.models._history import (
     HistoryClient,
 )
 from gravitywell.models._info import ComponentVersion, LocalVersion, VersionResponse, Versions
+from gravitywell.models._queries import (
+    DnssecStatus,
+    ExtendedDnsError,
+    LoggedQuery,
+    QueryClient,
+    QueryLogResponse,
+    QueryReply,
+    QueryStatus,
+    QuerySuggestions,
+    QuerySuggestionsResponse,
+    ReplyType,
+)
 from gravitywell.models._search import (
     DomainRule,
     ListMatch,
@@ -81,6 +93,17 @@ __all__ = [
     "LocalVersion",
     "VersionResponse",
     "Versions",
+    # gravitywell.models._queries
+    "DnssecStatus",
+    "ExtendedDnsError",
+    "LoggedQuery",
+    "QueryClient",
+    "QueryLogResponse",
+    "QueryReply",
+    "QueryStatus",
+    "QuerySuggestions",
+    "QuerySuggestionsResponse",
+    "ReplyType",
     # gravitywell.models._search
     "DomainRule",
     "ListMatch",
