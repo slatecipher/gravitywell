@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Annotated, Literal, cast
 
-from pydantic import BaseModel, BeforeValidator, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from gravitywell.models._base import QUERY_STATUSES, REPLY_TYPES, BaseResponse, zero_as_none
 
@@ -126,6 +126,9 @@ class LoggedQuery(BaseModel):
 
 class QueryLogResponse(BaseResponse):
     """A page of the Pi-hole's query log, newest first."""
+
+    # Pi-hole's names, or the field names a dump or an AI tool's result uses.
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     queries: list[LoggedQuery] = Field(description="Up to `count` queries that match the filters, newest first.")
     cursor: int | None = Field(

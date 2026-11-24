@@ -27,7 +27,7 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 - `_resources/`: one module per API area (`_resources/info.py`), holding the area's sync `Resource` and its async `AsyncResource` side by side. Private: callers reach them as `api.info`.
 - `_auth.py`: `PiHoleAuth`, an `httpx2.Auth` that logs in, sends the session, logs in again once after a 401, and logs out (`log_out`, `alog_out`) when a client closes.
 - `_client.py`: `PiHole` and `AsyncPiHole`, which mount one resource per area and share `_BasePiHole`'s constructor: the Pi-hole's URL, a required `auth=` (`PiHoleAuth`), `verify=` and `transport=`, not all of ClientX's arguments. The top-level `gravitywell` namespace exports only the clients, the auth and `__version__`.
-- Tests: one file per API area (`test_info.py`); `test_public_api.py` pins the exports of `gravitywell` and `gravitywell.models`.
+- Tests: one file per API area (`test_info.py`); `test_pi_hole.py` covers the client classes themselves, and `test_public_api.py` pins the exports of `gravitywell` and `gravitywell.models`.
 
 ## ClientX
 
@@ -39,7 +39,7 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 - Set `tool_options=ToolOptions(...)` (`clientx.tools`) where the HTTP method's AI tool hints are wrong, such as a POST that overwrites a setting: `set_blocking` is destructive and idempotent. ClientX's `list_tools` shows what a model sees: check new endpoints' descriptions and schemas with it.
 - An endpoint over a time range takes `time_range: Annotated[TimeRange, Query()]` (`models/_time.py`): ClientX spreads the model into `from` and `until`, and its serializers send Unix seconds, so callers and models pass `datetime`s with a timezone. A serializer on a parameter itself raises `DefinitionError`, and Pydantic's `AwareDatetime` isn't a plain value ClientX spreads, hence `datetime` with a validator.
 - Resource prefixes are absolute, also when nested: a resource mounted on another repeats its parent's prefix (`HistoryDatabase(prefix="/history/database")` on `History(prefix="/history")`). Dropping the parent's part sends requests to the wrong path. ClientX #178 proposes relative prefixes.
-- To guard an endpoint, make the raw request a private endpoint annotated `-> Response`, which keeps it out of AI tools, and the public method a `@tool` (`clientx.tools`) that checks first and raises `ArgumentError`: ClientX turns it into a `ToolError` whose message reaches the model. `groups.delete()` refuses the Default group this way.
+- To guard an endpoint, make the raw request a private endpoint annotated `-> Response`, which keeps it out of AI tools, and the public method a `@tool` (`clientx.tools`) that checks first and raises `ArgumentError`: ClientX turns it into a `ToolError` whose message reaches the model. `groups.delete()` refuses the Default group this way. ClientX #179 proposes a cleaner way to keep an endpoint out of AI tools.
 - ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
 
 ## Pi-hole
