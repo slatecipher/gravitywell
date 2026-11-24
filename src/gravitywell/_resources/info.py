@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from clientx import AsyncResource, Resource, Response, method
+from clientx import AsyncResource, Resource, method
 from clientx.tools import tool
 from pydantic import Field
 
@@ -44,9 +44,9 @@ class Info(Resource, prefix="/info"):
         ...
 
     # The raw request for `delete_messages` below, which joins the IDs into
-    # one path segment. `-> Response` keeps it out of AI tools.
+    # one path segment. ClientX leaves private names out of AI tools.
     @method.delete("/messages/{ids}")
-    def _delete_messages(self, ids: str) -> Response: ...
+    def _delete_messages(self, ids: str) -> None: ...
 
     @tool(destructive=True, idempotent=True)
     def delete_messages(self, ids: Annotated[list[int], Field(min_length=1)]) -> None:
@@ -159,9 +159,9 @@ class AsyncInfo(AsyncResource, prefix="/info"):
         ...
 
     # The raw request for `delete_messages` below, which joins the IDs into
-    # one path segment. `-> Response` keeps it out of AI tools.
+    # one path segment. ClientX leaves private names out of AI tools.
     @method.delete("/messages/{ids}")
-    async def _delete_messages(self, ids: str) -> Response: ...
+    async def _delete_messages(self, ids: str) -> None: ...
 
     @tool(destructive=True, idempotent=True)
     async def delete_messages(self, ids: Annotated[list[int], Field(min_length=1)]) -> None:

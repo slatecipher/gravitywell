@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "anyio>=4.10",
-    "clientx>=0.4.1",
+    "clientx>=0.5.0",
     "pydantic>=2.12.5",
 ]
 

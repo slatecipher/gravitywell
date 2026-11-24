@@ -26,15 +26,15 @@ wheels = [
 
 [[package]]
 name = "clientx"
-version = "0.4.1"
+version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx2" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/71/4d/e9d3a3ccc1ee1425f6afecd0e1a28e8d389daa8ea2d7ff1fed75fee1f182/clientx-0.4.1.tar.gz", hash = "sha256:5bf1cb3e8abb07042b0144ecb0230bd9f53f01c56b3aa8a20b6386105f932ac6", size = 64693, upload-time = "2026-11-24T17:41:41.401Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/c6/de2835ee6fa58607b6bdd3ea87081cbe1d5026d23d7e89f8e120058288dc/clientx-0.5.0.tar.gz", hash = "sha256:76c880940dcd92d971678cdc49582e859db3a1edb3ed6017a6aace7194135b37", size = 64988, upload-time = "2026-11-24T18:58:40.346Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/72/96d459ef0a3f530f2a22587f8f40b5bb956704fb50f0f59a26db5be0a3ea/clientx-0.4.1-py3-none-any.whl", hash = "sha256:b4509c6c625f03920930f85f8308c1afeaff9811ba4b31d50a582c32fccf14dc", size = 73286, upload-time = "2026-11-24T17:41:40.353Z" },
+    { url = "https://files.pythonhosted.org/packages/14/f6/d968ddf59a7e85585b7b85e05c31dd67372cbb60e08042dc6156a43568e0/clientx-0.5.0-py3-none-any.whl", hash = "sha256:bf353d3a008127607fb97dc2d068ffb8e2a01efe536dfe422ba0649a19ccf20c", size = 73587, upload-time = "2026-11-24T18:58:39.181Z" },
 ]
 
 [[package]]
@@ -178,7 +178,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anyio", specifier = ">=4.10" },
-    { name = "clientx", specifier = ">=0.4.1" },
+    { name = "clientx", specifier = ">=0.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
 ]
 
