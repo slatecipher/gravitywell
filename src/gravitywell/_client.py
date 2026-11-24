@@ -35,30 +35,31 @@ class _BasePiHole[TransportT: BaseTransport | AsyncBaseTransport]:
         replies into Pydantic models. Its attributes group the endpoints by
         API area, such as `api.info`, and each endpoint returns a model of its
         whole response body, from `gravitywell.models`. A 4xx or 5xx response
-        raises `HTTPStatusError`.
+        raises `httpx2.HTTPStatusError`.
 
-        It's an `Client`, or an `AsyncClient` for `AsyncPiHole`,
+        It's an `httpx2.Client`, or an `httpx2.AsyncClient` for `AsyncPiHole`,
         built with ClientX. It logs in on its first request and reuses that
         session. Close it when you're done, by leaving its `with` block or
         calling `close()` (`aclose()` when async), to log out: a Pi-hole
         allows only a few sessions at a time.
 
         Args:
-            base_url: The Pi-hole's URL, without `/api`, such as
-                `http://pi.hole`.
+            base_url: The Pi-hole's URL, such as `http://pi.hole`. The client
+                sets its path to `/api`, where the REST API is, so
+                `http://pi.hole/api` works too, and any other path is
+                replaced.
             auth: Logs in to the Pi-hole and sends its session on requests.
                 Closing the client logs out.
             verify: How to check the Pi-hole's HTTPS certificate: an
                 `ssl.SSLContext` that trusts Pi-hole's self-signed one, or
                 `False` to skip the check.
             transport: Sends the requests in place of the network, such as an
-                `MockTransport` in tests. `AsyncPiHole` takes an async
+                `httpx2.MockTransport` in tests. `AsyncPiHole` takes an async
                 one.
         """
+        base_url = URL(base_url).copy_with(path="/api")
         # `super()` is `ClientX` or `AsyncClientX`, next in the subclass's MRO,
         # which pyright can't see from this class.
-        base_url = URL(base_url).copy_with(path="/api")
-
         cast("Any", super()).__init__(base_url, auth=auth, verify=verify, transport=transport)
 
 
