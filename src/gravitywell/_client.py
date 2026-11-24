@@ -12,6 +12,7 @@ from gravitywell._resources.dns import AsyncDns, Dns
 from gravitywell._resources.domains import AsyncDomains, Domains
 from gravitywell._resources.history import AsyncHistory, History
 from gravitywell._resources.info import AsyncInfo, Info
+from gravitywell._resources.lists import AsyncLists, Lists
 from gravitywell._resources.queries import AsyncQueries, Queries
 from gravitywell._resources.search import AsyncSearch, Search
 from gravitywell._resources.stats import AsyncStats, Stats
@@ -79,6 +80,7 @@ class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__ve
     dns = Dns()
     history = History()
     info = Info()
+    lists = Lists()
     queries = Queries()
     search = Search()
     stats = Stats()
@@ -112,6 +114,7 @@ class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gr
     dns = AsyncDns()
     history = AsyncHistory()
     info = AsyncInfo()
+    lists = AsyncLists()
     queries = AsyncQueries()
     search = AsyncSearch()
     stats = AsyncStats()
