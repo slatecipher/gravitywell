@@ -12,7 +12,7 @@ from gravitywell.models import BlockingResponse
 _SET_BLOCKING = ToolOptions(destructive=True, idempotent=True)
 
 
-class Dns(Resource, prefix="/dns"):
+class Dns(Resource, prefix="/dns", tags=["dns"]):
     """Control the Pi-hole's blocking."""
 
     @method.get("/blocking")
@@ -50,7 +50,7 @@ class Dns(Resource, prefix="/dns"):
         ...
 
 
-class AsyncDns(AsyncResource, prefix="/dns"):
+class AsyncDns(AsyncResource, prefix="/dns", tags=["dns"]):
     """Control the Pi-hole's blocking."""
 
     @method.get("/blocking")

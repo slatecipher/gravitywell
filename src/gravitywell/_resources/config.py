@@ -319,7 +319,7 @@ def _lease_entry(entries: list[str], hwaddr: str) -> str:
     return matches[0]
 
 
-class Config(Resource, prefix="/config"):
+class Config(Resource, prefix="/config", tags=["config"]):
     """Pi-hole settings: local DNS and CNAME records, and upstream servers."""
 
     # Raw requests for the methods below, which build an entry, find the stored
@@ -653,7 +653,7 @@ class Config(Resource, prefix="/config"):
         self._delete_lease(_lease_entry(self._lease_entries(), hwaddr))
 
 
-class AsyncConfig(AsyncResource, prefix="/config"):
+class AsyncConfig(AsyncResource, prefix="/config", tags=["config"]):
     """Pi-hole settings: local DNS and CNAME records, and upstream servers."""
 
     # Raw requests for the methods below, which build an entry, find the stored

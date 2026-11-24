@@ -7,7 +7,7 @@ from clientx import AsyncResource, Query, Resource, method
 from gravitywell.models import GatewayResponse, InterfacesResponse, NetworkDevicesResponse, RoutesResponse
 
 
-class Network(Resource, prefix="/network"):
+class Network(Resource, prefix="/network", tags=["network"]):
     """The network the Pi-hole sees: devices, interfaces, routes and gateway."""
 
     @method.get("/devices")
@@ -73,7 +73,7 @@ class Network(Resource, prefix="/network"):
         ...
 
 
-class AsyncNetwork(AsyncResource, prefix="/network"):
+class AsyncNetwork(AsyncResource, prefix="/network", tags=["network"]):
     """The network the Pi-hole sees: devices, interfaces, routes and gateway."""
 
     @method.get("/devices")

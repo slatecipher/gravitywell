@@ -12,7 +12,7 @@ from gravitywell.models import ChangedListsResponse, ListKey, ListsResponse, Lis
 _BATCH_DELETE = ToolOptions(destructive=True, idempotent=True)
 
 
-class ListsBatch(Resource):
+class ListsBatch(Resource, tags=["lists"]):
     """Change several subscribed lists at once."""
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
@@ -30,7 +30,7 @@ class ListsBatch(Resource):
         ...
 
 
-class Lists(Resource, prefix="/lists"):
+class Lists(Resource, prefix="/lists", tags=["lists"]):
     """The blocklists and allowlists the Pi-hole subscribes to."""
 
     batch = ListsBatch()
@@ -141,7 +141,7 @@ class Lists(Resource, prefix="/lists"):
         ...
 
 
-class AsyncListsBatch(AsyncResource):
+class AsyncListsBatch(AsyncResource, tags=["lists"]):
     """Change several subscribed lists at once."""
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
@@ -159,7 +159,7 @@ class AsyncListsBatch(AsyncResource):
         ...
 
 
-class AsyncLists(AsyncResource, prefix="/lists"):
+class AsyncLists(AsyncResource, prefix="/lists", tags=["lists"]):
     """The blocklists and allowlists the Pi-hole subscribes to."""
 
     batch = AsyncListsBatch()

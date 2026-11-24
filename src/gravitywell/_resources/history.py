@@ -13,7 +13,7 @@ from gravitywell.models import (
 )
 
 
-class HistoryDatabase(Resource, prefix="/history/database"):
+class HistoryDatabase(Resource, prefix="/history/database", tags=["history"]):
     """Query counts over time, from the Pi-hole's query database."""
 
     @method.get()
@@ -48,7 +48,7 @@ class HistoryDatabase(Resource, prefix="/history/database"):
         ...
 
 
-class History(Resource, prefix="/history"):
+class History(Resource, prefix="/history", tags=["history"]):
     """Query counts over time, in 10-minute slots."""
 
     database = HistoryDatabase()
@@ -83,7 +83,7 @@ class History(Resource, prefix="/history"):
         ...
 
 
-class AsyncHistoryDatabase(AsyncResource, prefix="/history/database"):
+class AsyncHistoryDatabase(AsyncResource, prefix="/history/database", tags=["history"]):
     """Query counts over time, from the Pi-hole's query database."""
 
     @method.get()
@@ -118,7 +118,7 @@ class AsyncHistoryDatabase(AsyncResource, prefix="/history/database"):
         ...
 
 
-class AsyncHistory(AsyncResource, prefix="/history"):
+class AsyncHistory(AsyncResource, prefix="/history", tags=["history"]):
     """Query counts over time, in 10-minute slots."""
 
     database = AsyncHistoryDatabase()

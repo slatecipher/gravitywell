@@ -31,13 +31,25 @@ dependencies = [
     "pydantic>=2.12.5",
 ]
 
+[project.optional-dependencies]
+# `gravitywell.mcp` and the `gravitywell-mcp` command: an MCP server for the
+# AI tools, on FastMCP.
+mcp = ["click>=8.1", "clientx[fastmcp]>=0.5.0", "python-dotenv>=1.1"]
+
+[project.scripts]
+gravitywell-mcp = "gravitywell.mcp:main"
+
 [build-system]
 requires = ["uv_build>=0.12.3,<0.14.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    # The `mcp` extra's dependencies, so tests and pyright see them.
+    "click>=8.1",
+    "clientx[fastmcp]>=0.5.0",
     "pyright>=1.1.411",
+    "python-dotenv>=1.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.10",

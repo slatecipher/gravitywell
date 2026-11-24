@@ -22,7 +22,7 @@ def _archive_file(archive: bytes) -> tuple[str, bytes, str]:
     return ("teleporter.zip", archive, "application/zip")
 
 
-class Teleporter(Resource, prefix="/teleporter"):
+class Teleporter(Resource, prefix="/teleporter", tags=["teleporter"]):
     """Teleporter backups of the Pi-hole, for Python only."""
 
     @method.get("")
@@ -73,7 +73,7 @@ class Teleporter(Resource, prefix="/teleporter"):
         return self._restore(_archive_file(archive), parts or RestoreParts())
 
 
-class AsyncTeleporter(AsyncResource, prefix="/teleporter"):
+class AsyncTeleporter(AsyncResource, prefix="/teleporter", tags=["teleporter"]):
     """Teleporter backups of the Pi-hole, for Python only."""
 
     @method.get("")

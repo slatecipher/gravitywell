@@ -186,5 +186,11 @@ def test_every_response_model_extends_base_response() -> None:
         assert issubclass(getattr(gravitywell.models, name), BaseResponse), name
 
 
+def test_mcp_exports() -> None:
+    import gravitywell.mcp
+
+    assert gravitywell.mcp.__all__ == ["create_server", "main"]
+
+
 def test_version_is_the_installed_one() -> None:
     assert gravitywell.__version__ == importlib.metadata.version("gravitywell")

@@ -10,7 +10,7 @@ from clientx import AsyncResource, Query, Resource, method
 from gravitywell.models import PaddResponse
 
 
-class Padd(Resource, prefix="/padd"):
+class Padd(Resource, prefix="/padd", tags=["padd"]):
     """PADD's summary of the Pi-hole's state."""
 
     @method.get("")
@@ -30,7 +30,7 @@ class Padd(Resource, prefix="/padd"):
         ...
 
 
-class AsyncPadd(AsyncResource, prefix="/padd"):
+class AsyncPadd(AsyncResource, prefix="/padd", tags=["padd"]):
     """PADD's summary of the Pi-hole's state."""
 
     @method.get("")

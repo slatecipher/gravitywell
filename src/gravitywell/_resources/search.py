@@ -7,7 +7,7 @@ from clientx import AsyncResource, Query, Resource, method
 from gravitywell.models import SearchResponse
 
 
-class Search(Resource, prefix="/search"):
+class Search(Resource, prefix="/search", tags=["search"]):
     """Look up how the Pi-hole treats a domain."""
 
     @method.get("/{domain}")
@@ -40,7 +40,7 @@ class Search(Resource, prefix="/search"):
         ...
 
 
-class AsyncSearch(AsyncResource, prefix="/search"):
+class AsyncSearch(AsyncResource, prefix="/search", tags=["search"]):
     """Look up how the Pi-hole treats a domain."""
 
     @method.get("/{domain}")

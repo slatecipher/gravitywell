@@ -24,7 +24,7 @@ def _refuse_default_group(groups: Iterable[Group], *, parameter: str) -> None:
         raise ArgumentError(msg, parameter=parameter)
 
 
-class GroupsBatch(Resource):
+class GroupsBatch(Resource, tags=["groups"]):
     """Change several groups at once."""
 
     # Raw requests for `delete` below, which checks for the Default group
@@ -57,7 +57,7 @@ class GroupsBatch(Resource):
         self._delete(groups)
 
 
-class Groups(Resource, prefix="/groups"):
+class Groups(Resource, prefix="/groups", tags=["groups"]):
     """The Pi-hole's groups of clients, which rules and lists apply to."""
 
     batch = GroupsBatch()
@@ -178,7 +178,7 @@ class Groups(Resource, prefix="/groups"):
         ...
 
 
-class AsyncGroupsBatch(AsyncResource):
+class AsyncGroupsBatch(AsyncResource, tags=["groups"]):
     """Change several groups at once."""
 
     # Raw requests for `delete` below, which checks for the Default group
@@ -211,7 +211,7 @@ class AsyncGroupsBatch(AsyncResource):
         await self._delete(groups)
 
 
-class AsyncGroups(AsyncResource, prefix="/groups"):
+class AsyncGroups(AsyncResource, prefix="/groups", tags=["groups"]):
     """The Pi-hole's groups of clients, which rules and lists apply to."""
 
     batch = AsyncGroupsBatch()

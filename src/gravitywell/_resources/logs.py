@@ -27,7 +27,7 @@ def _clean(response: LogResponse, lines: int | None) -> LogResponse:
     return response.model_copy(update={"log": redacted})
 
 
-class Logs(Resource, prefix="/logs"):
+class Logs(Resource, prefix="/logs", tags=["logs"]):
     """The logs of the Pi-hole's DNS resolver, FTL and web server."""
 
     # The raw request for the methods below, which keep the newest lines and
@@ -96,7 +96,7 @@ class Logs(Resource, prefix="/logs"):
         return _clean(self._log("webserver", next_id), lines)
 
 
-class AsyncLogs(AsyncResource, prefix="/logs"):
+class AsyncLogs(AsyncResource, prefix="/logs", tags=["logs"]):
     """The logs of the Pi-hole's DNS resolver, FTL and web server."""
 
     # The raw request for the methods below, which keep the newest lines and
