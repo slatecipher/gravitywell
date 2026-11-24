@@ -22,6 +22,7 @@ from gravitywell.models._domains import (
     RuleKind,
     RuleType,
 )
+from gravitywell.models._groups import ChangedGroupsResponse, Group, GroupKey, GroupsResponse
 from gravitywell.models._history import (
     ActivityResponse,
     ActivitySlot,
@@ -96,6 +97,11 @@ __all__ = [
     "DomainsResponse",
     "RuleKind",
     "RuleType",
+    # gravitywell.models._groups
+    "ChangedGroupsResponse",
+    "Group",
+    "GroupKey",
+    "GroupsResponse",
     # gravitywell.models._history
     "ActivityResponse",
     "ActivitySlot",
