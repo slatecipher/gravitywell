@@ -3,7 +3,7 @@
 from collections.abc import Iterable
 from typing import Annotated
 
-from clientx import ArgumentError, AsyncResource, Json, Resource, Response, method
+from clientx import ArgumentError, AsyncResource, Json, Resource, method
 from clientx.tools import tool
 
 from gravitywell.models import ChangedGroupsResponse, Group, GroupKey, GroupsResponse
@@ -28,15 +28,15 @@ class GroupsBatch(Resource):
     """Change several groups at once."""
 
     # Raw requests for `delete` below, which checks for the Default group
-    # first. `-> Response` keeps them out of AI tools, so a model can't go
-    # around that check.
+    # first. ClientX leaves private names out of AI tools, so a model can't
+    # go around that check.
     @method.get("/groups")
-    def _groups(self) -> Response: ...
+    def _groups(self) -> GroupsResponse: ...
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
     # (ClientX #173).
     @method.post("/groups:batchDelete")
-    def _delete(self, groups: Annotated[list[GroupKey], Json()]) -> Response: ...
+    def _delete(self, groups: Annotated[list[GroupKey], Json()]) -> None: ...
 
     @tool(destructive=True, idempotent=True)
     def delete(self, groups: list[GroupKey]) -> None:
@@ -52,7 +52,7 @@ class GroupsBatch(Resource):
             groups: The groups to delete, each by its name.
         """
         names = {key.name for key in groups}
-        current = GroupsResponse.model_validate_json(self._groups().content).groups
+        current = self._groups().groups
         _refuse_default_group([group for group in current if group.name in names], parameter="groups")
         self._delete(groups)
 
@@ -142,10 +142,10 @@ class Groups(Resource, prefix="/groups"):
         ...
 
     # The raw request for `delete` below, which checks for the Default group
-    # first. `-> Response` keeps it out of AI tools, so a model can't go
-    # around that check.
+    # first. ClientX leaves private names out of AI tools, so a model can't
+    # go around that check.
     @method.delete("/{name}")
-    def _delete(self, name: str) -> Response: ...
+    def _delete(self, name: str) -> None: ...
 
     @tool(destructive=True, idempotent=True)
     def delete(self, name: str) -> None:
@@ -182,15 +182,15 @@ class AsyncGroupsBatch(AsyncResource):
     """Change several groups at once."""
 
     # Raw requests for `delete` below, which checks for the Default group
-    # first. `-> Response` keeps them out of AI tools, so a model can't go
-    # around that check.
+    # first. ClientX leaves private names out of AI tools, so a model can't
+    # go around that check.
     @method.get("/groups")
-    async def _groups(self) -> Response: ...
+    async def _groups(self) -> GroupsResponse: ...
 
     # The full path: ClientX joins a prefix and `:batchDelete` with a slash
     # (ClientX #173).
     @method.post("/groups:batchDelete")
-    async def _delete(self, groups: Annotated[list[GroupKey], Json()]) -> Response: ...
+    async def _delete(self, groups: Annotated[list[GroupKey], Json()]) -> None: ...
 
     @tool(destructive=True, idempotent=True)
     async def delete(self, groups: list[GroupKey]) -> None:
@@ -206,7 +206,7 @@ class AsyncGroupsBatch(AsyncResource):
             groups: The groups to delete, each by its name.
         """
         names = {key.name for key in groups}
-        current = GroupsResponse.model_validate_json((await self._groups()).content).groups
+        current = (await self._groups()).groups
         _refuse_default_group([group for group in current if group.name in names], parameter="groups")
         await self._delete(groups)
 
@@ -296,10 +296,10 @@ class AsyncGroups(AsyncResource, prefix="/groups"):
         ...
 
     # The raw request for `delete` below, which checks for the Default group
-    # first. `-> Response` keeps it out of AI tools, so a model can't go
-    # around that check.
+    # first. ClientX leaves private names out of AI tools, so a model can't
+    # go around that check.
     @method.delete("/{name}")
-    async def _delete(self, name: str) -> Response: ...
+    async def _delete(self, name: str) -> None: ...
 
     @tool(destructive=True, idempotent=True)
     async def delete(self, name: str) -> None:
