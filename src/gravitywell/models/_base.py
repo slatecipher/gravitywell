@@ -17,6 +17,12 @@ REPLY_TYPES = (
     "`REFUSED`, `NOTIMP`, `DNSSEC`, `RRNAME`, `OTHER`, `NONE` (not answered yet) and `UNKNOWN`."
 )
 
+# The groups a rule, list or client belongs to.
+GROUP_IDS = (
+    "IDs of the groups it applies to: it affects only clients in those groups. `0` is the Default group, which every "
+    "client is in unless moved."
+)
+
 
 def zero_as_none(value: object) -> object:
     """Read the `0` Pi-hole sends for a time it doesn't know as `None`."""
