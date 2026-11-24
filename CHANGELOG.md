@@ -32,3 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `api.lists`, the blocklists and allowlists the Pi-hole subscribes to: `list()`, `get()`, `add()` (one URL or several, reporting which were saved), `update()`, `delete()` and `batch.delete()` (`/api/lists`). Each list shows its domain count and how its last download went.
 - `api.groups`, the groups of clients that rules and lists apply to: `list()`, `get()`, `add()` (one name or several, reporting which were saved), `update()`, `rename()`, `delete()` and `batch.delete()` (`/api/groups`). `delete()` and `batch.delete()` refuse to delete the Default group, found by its ID even when renamed, with an `ArgumentError`: Pi-hole would re-create it empty, detaching every rule, list and client in it.
 - `api.clients`, the clients the Pi-hole recognizes by IP address, subnet, MAC address, hostname or interface, and the groups they're in: `list()`, `get()`, `add()` (one or several, reporting which were saved), `update()`, `delete()`, `batch.delete()`, and `suggestions()` for devices seen but not configured yet (`/api/clients`).
+
+### Changed
+
+- Require ClientX 0.6.
