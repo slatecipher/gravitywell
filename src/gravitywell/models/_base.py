@@ -1,5 +1,7 @@
 """The base of every response body model, and what models share."""
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 # What the Pi-hole did with a query, and the kinds of reply: the stats summary
@@ -15,6 +17,16 @@ REPLY_TYPES = (
     "`IP` (an address), `NXDOMAIN` (no such domain), `NODATA` (no record of that type), `CNAME`, `DOMAIN` (a name, "
     "such as a reverse lookup's), `BLOB` (other record data, such as a `TXT`, `MX` or `HTTPS` answer), `SERVFAIL`, "
     "`REFUSED`, `NOTIMP`, `DNSSEC`, `RRNAME`, `OTHER`, `NONE` (not answered yet) and `UNKNOWN`."
+)
+
+# Whether the Pi-hole is blocking: the blocking endpoint and PADD's summary
+# report it. FTL sends `failure`, though its API spec says `failed`: accept
+# both.
+BlockingStatus = Literal["enabled", "disabled", "failure", "failed", "unknown"]
+BLOCKING_STATUS = (
+    "The status: `enabled` (blocking), `disabled` (letting every domain through), `failure` (the DNS server isn't "
+    "running, so nothing is answered; the API's spec calls it `failed`) or `unknown` (not known yet, such as while "
+    "the Pi-hole starts)."
 )
 
 # The groups a rule, list or client belongs to.
