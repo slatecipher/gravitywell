@@ -14,10 +14,21 @@ class LocalVersion(BaseModel):
     version: str | None = Field(description="Its version, such as `v6.1`, or `null` if the Pi-hole doesn't report one.")
 
 
+class RemoteVersion(BaseModel):
+    """A component's newest release, as the Pi-hole last checked."""
+
+    version: str | None = Field(
+        description="The newest version, such as `v6.2`, or `null` if the Pi-hole hasn't checked or couldn't."
+    )
+
+
 class ComponentVersion(BaseModel):
-    """A Pi-hole component's version, as installed, under `local`."""
+    """A Pi-hole component's version: as installed, and its newest release."""
 
     local: LocalVersion
+    remote: RemoteVersion | None = Field(
+        default=None, description="Its newest release, or `null` if the Pi-hole didn't say."
+    )
 
 
 class Versions(BaseModel):

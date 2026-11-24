@@ -35,9 +35,11 @@ These tools inspect and manage a Pi-hole, the network-wide DNS sinkhole that \
 blocks ads and trackers for every device that uses it as its DNS server. They \
 call the Pi-hole's REST API through gravitywell, a third-party client.
 
-- For an overview of how the Pi-hole is doing, start with `padd_summary`.
-- To see why a domain is blocked or allowed, `search_lists` finds the rules and \
-lists that match it, and `queries_log` shows what happened to each query.
+- To check whether the Pi-hole is all right, start with `check_health`, and for \
+its activity, `padd_summary`.
+- To see why a domain is blocked or allowed, use `explain_domain`, and to \
+identify a device by its IP address, `explain_client`. Each gathers several \
+endpoints in one call.
 - Times are in UTC. Statistics cover the last 24 hours unless a tool takes a \
 time range.
 - Which tools exist depends on how the server was started: read-only ones by \

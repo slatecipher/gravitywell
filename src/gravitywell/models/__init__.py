@@ -94,6 +94,7 @@ from gravitywell.models._info import (
     Metrics,
     MetricsResponse,
     RamUsage,
+    RemoteVersion,
     Sensor,
     Sensors,
     SensorsResponse,
@@ -105,6 +106,7 @@ from gravitywell.models._info import (
     VersionResponse,
     Versions,
 )
+from gravitywell.models._insights import ClientExplanation, ComponentUpdate, DomainExplanation, HealthReport
 from gravitywell.models._lists import ChangedListsResponse, ListKey, ListsResponse, ListType, SubscribedList
 from gravitywell.models._logs import LogLine, LogResponse
 from gravitywell.models._network import (
@@ -269,6 +271,7 @@ __all__ = [
     "Metrics",
     "MetricsResponse",
     "RamUsage",
+    "RemoteVersion",
     "Sensor",
     "Sensors",
     "SensorsResponse",
@@ -279,6 +282,11 @@ __all__ = [
     "Uname",
     "VersionResponse",
     "Versions",
+    # gravitywell.models._insights
+    "ClientExplanation",
+    "ComponentUpdate",
+    "DomainExplanation",
+    "HealthReport",
     # gravitywell.models._lists
     "ChangedListsResponse",
     "ListKey",
