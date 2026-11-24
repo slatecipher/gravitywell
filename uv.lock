@@ -226,15 +226,15 @@ wheels = [
 
 [[package]]
 name = "clientx"
-version = "0.5.0"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx2" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a1/c6/de2835ee6fa58607b6bdd3ea87081cbe1d5026d23d7e89f8e120058288dc/clientx-0.5.0.tar.gz", hash = "sha256:76c880940dcd92d971678cdc49582e859db3a1edb3ed6017a6aace7194135b37", size = 64988, upload-time = "2026-11-24T18:58:40.346Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/18/72/6beb04ae4ee257409d14f457655f8bb986d86ff1898948d8f242ecf6b0bf/clientx-0.6.0.tar.gz", hash = "sha256:070c8158ce0f4f2dd64d6d21b8f788cb706b95002a618fae6878966feef096f2", size = 65499, upload-time = "2026-11-24T21:25:52.083Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/f6/d968ddf59a7e85585b7b85e05c31dd67372cbb60e08042dc6156a43568e0/clientx-0.5.0-py3-none-any.whl", hash = "sha256:bf353d3a008127607fb97dc2d068ffb8e2a01efe536dfe422ba0649a19ccf20c", size = 73587, upload-time = "2026-11-24T18:58:39.181Z" },
+    { url = "https://files.pythonhosted.org/packages/70/69/5042bfeac0ccbb1289c26f22514f4e99ea6d51bbceb17bfcb17fd8ea2f3d/clientx-0.6.0-py3-none-any.whl", hash = "sha256:2a271da50a485ed2313e0c178ad0143a1fe9380d1032f443f485cc54b4088841", size = 74128, upload-time = "2026-11-24T21:25:51.011Z" },
 ]
 
 [package.optional-dependencies]
@@ -583,8 +583,8 @@ dev = [
 requires-dist = [
     { name = "anyio", specifier = ">=4.10" },
     { name = "click", marker = "extra == 'mcp'", specifier = ">=8.1" },
-    { name = "clientx", specifier = ">=0.5.0" },
-    { name = "clientx", extras = ["fastmcp"], marker = "extra == 'mcp'", specifier = ">=0.5.0" },
+    { name = "clientx", specifier = ">=0.6.0" },
+    { name = "clientx", extras = ["fastmcp"], marker = "extra == 'mcp'", specifier = ">=0.6.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "python-dotenv", marker = "extra == 'mcp'", specifier = ">=1.1" },
 ]
@@ -593,7 +593,7 @@ provides-extras = ["mcp"]
 [package.metadata.requires-dev]
 dev = [
     { name = "click", specifier = ">=8.1" },
-    { name = "clientx", extras = ["fastmcp"], specifier = ">=0.5.0" },
+    { name = "clientx", extras = ["fastmcp"], specifier = ">=0.6.0" },
     { name = "pyright", specifier = ">=1.1.411" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-cov", specifier = ">=7.0.0" },

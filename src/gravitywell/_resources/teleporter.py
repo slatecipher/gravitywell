@@ -1,8 +1,8 @@
 """The Teleporter endpoints, under `/teleporter`: backups, for Python only.
 
 A backup holds the password hashes, and a restore overwrites everything, so
-neither is an AI tool: `export` streams, and `restore` is a plain method over a
-private endpoint, both of which ClientX leaves out of tools.
+neither is an AI tool: `export` says so with ClientX's `include_in_tools=False`,
+and `restore` is a plain method over a private endpoint.
 """
 
 from collections.abc import AsyncIterator, Iterator
@@ -25,7 +25,8 @@ def _archive_file(archive: bytes) -> tuple[str, bytes, str]:
 class Teleporter(Resource, prefix="/teleporter", tags=["teleporter"]):
     """Teleporter backups of the Pi-hole, for Python only."""
 
-    @method.get("")
+    # It holds the password hashes: never an AI tool, whatever its type.
+    @method.get("", include_in_tools=False)
     def export(self) -> Iterator[bytes]:
         """Download a Teleporter backup of the Pi-hole, as a zip archive.
 
@@ -76,7 +77,8 @@ class Teleporter(Resource, prefix="/teleporter", tags=["teleporter"]):
 class AsyncTeleporter(AsyncResource, prefix="/teleporter", tags=["teleporter"]):
     """Teleporter backups of the Pi-hole, for Python only."""
 
-    @method.get("")
+    # It holds the password hashes: never an AI tool, whatever its type.
+    @method.get("", include_in_tools=False)
     async def export(self) -> AsyncIterator[bytes]:
         """Download a Teleporter backup of the Pi-hole, as a zip archive.
 
