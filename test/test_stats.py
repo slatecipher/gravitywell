@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
 
 import httpx2
 import pytest
@@ -9,8 +9,8 @@ from gravitywell.models import SummaryResponse
 
 BASE_URL = "http://pi.hole"
 PASSWORD = "app-password"
-# What the auth's login and logout get, around the endpoint's request.
-SESSION_BODY = {"session": {"sid": "sid-1"}, "took": 0.003}
+# conftest.py's `serve` fixture.
+type Serve = Callable[[object], httpx2.MockTransport]
 LAST_UPDATE = 1795533826
 
 # A test Pi-hole's answer after a few dozen queries, with the breakdowns cut
@@ -34,16 +34,6 @@ SUMMARY_BODY = {
 }
 
 
-def serve(body: dict[str, Any], sent: list[httpx2.Request]) -> httpx2.MockTransport:
-    def handler(request: httpx2.Request) -> httpx2.Response:
-        if request.url.path == "/api/auth":
-            return httpx2.Response(200, json=SESSION_BODY)
-        sent.append(request)
-        return httpx2.Response(200, json=body)
-
-    return httpx2.MockTransport(handler)
-
-
 def assert_read(summary: SummaryResponse) -> None:
     queries = summary.queries
     assert (queries.total, queries.blocked, queries.forwarded, queries.cached) == (43, 5, 28, 10)
@@ -52,10 +42,8 @@ def assert_read(summary: SummaryResponse) -> None:
     assert summary.gravity.last_update == datetime.fromtimestamp(LAST_UPDATE, tz=UTC)
 
 
-def test_summary_gets_stats_summary_and_reads_the_totals() -> None:
-    sent: list[httpx2.Request] = []
-
-    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(SUMMARY_BODY, sent)) as api:
+def test_summary_gets_stats_summary_and_reads_the_totals(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(SUMMARY_BODY)) as api:
         assert_read(api.stats.summary())
 
     [request] = sent
@@ -63,18 +51,16 @@ def test_summary_gets_stats_summary_and_reads_the_totals() -> None:
 
 
 @pytest.mark.anyio
-async def test_async_summary_gets_stats_summary_and_reads_the_totals() -> None:
-    sent: list[httpx2.Request] = []
-
-    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(SUMMARY_BODY, sent)) as api:
+async def test_async_summary_gets_stats_summary_and_reads_the_totals(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(SUMMARY_BODY)) as api:
         assert_read(await api.stats.summary())
 
     [request] = sent
     assert (request.method, request.url.path) == ("GET", "/api/stats/summary")
 
 
-def test_a_last_update_of_zero_reads_as_unknown() -> None:
+def test_a_last_update_of_zero_reads_as_unknown(serve: Serve) -> None:
     body = {**SUMMARY_BODY, "gravity": {"domains_being_blocked": 0, "last_update": 0}}
 
-    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(body, [])) as api:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(body)) as api:
         assert api.stats.summary().gravity.last_update is None

@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from typing import Any
 
 import httpx2
@@ -9,25 +10,13 @@ from gravitywell import AsyncPiHole, PiHole, PiHoleAuth
 
 BASE_URL = "http://pi.hole"
 PASSWORD = "app-password"
-# What the auth's login and logout get, around the endpoint's request.
-SESSION_BODY = {"session": {"sid": "sid-1"}, "took": 0.003}
+# conftest.py's `serve` fixture.
+type Serve = Callable[[object], httpx2.MockTransport]
 BLOCKING_BODY = {"blocking": "disabled", "timer": 299.5, "took": 0.0001}
 
 
-def serve(body: dict[str, Any], sent: list[httpx2.Request]) -> httpx2.MockTransport:
-    def handler(request: httpx2.Request) -> httpx2.Response:
-        if request.url.path == "/api/auth":
-            return httpx2.Response(200, json=SESSION_BODY)
-        sent.append(request)
-        return httpx2.Response(200, json=body)
-
-    return httpx2.MockTransport(handler)
-
-
-def test_blocking_gets_dns_blocking_and_reads_the_status_and_timer() -> None:
-    sent: list[httpx2.Request] = []
-
-    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY, sent)) as api:
+def test_blocking_gets_dns_blocking_and_reads_the_status_and_timer(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY)) as api:
         status = api.dns.blocking()
 
     assert (status.blocking, status.timer) == ("disabled", 299.5)
@@ -36,10 +25,10 @@ def test_blocking_gets_dns_blocking_and_reads_the_status_and_timer() -> None:
 
 
 @pytest.mark.anyio
-async def test_async_blocking_gets_dns_blocking_and_reads_the_status_and_timer() -> None:
-    sent: list[httpx2.Request] = []
-
-    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY, sent)) as api:
+async def test_async_blocking_gets_dns_blocking_and_reads_the_status_and_timer(
+    serve: Serve, sent: list[httpx2.Request]
+) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY)) as api:
         status = await api.dns.blocking()
 
     assert (status.blocking, status.timer) == ("disabled", 299.5)
@@ -47,10 +36,10 @@ async def test_async_blocking_gets_dns_blocking_and_reads_the_status_and_timer()
     assert (request.method, request.url.path) == ("GET", "/api/dns/blocking")
 
 
-def test_blocking_reads_failure_which_ftl_sends_though_its_spec_says_failed() -> None:
+def test_blocking_reads_failure_which_ftl_sends_though_its_spec_says_failed(serve: Serve) -> None:
     body = {"blocking": "failure", "timer": None, "took": 0.0001}
 
-    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(body, [])) as api:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(body)) as api:
         assert api.dns.blocking().blocking == "failure"
 
 
@@ -62,10 +51,10 @@ SET_BLOCKING_CASES = [
 
 
 @pytest.mark.parametrize(("arguments", "sent_body"), SET_BLOCKING_CASES)
-def test_set_blocking_posts_the_status_and_any_timer(arguments: dict[str, Any], sent_body: dict[str, Any]) -> None:
-    sent: list[httpx2.Request] = []
-
-    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY, sent)) as api:
+def test_set_blocking_posts_the_status_and_any_timer(
+    arguments: dict[str, Any], sent_body: dict[str, Any], serve: Serve, sent: list[httpx2.Request]
+) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY)) as api:
         status = api.dns.set_blocking(**arguments)
 
     assert status.blocking == "disabled"
@@ -77,11 +66,9 @@ def test_set_blocking_posts_the_status_and_any_timer(arguments: dict[str, Any], 
 @pytest.mark.anyio
 @pytest.mark.parametrize(("arguments", "sent_body"), SET_BLOCKING_CASES)
 async def test_async_set_blocking_posts_the_status_and_any_timer(
-    arguments: dict[str, Any], sent_body: dict[str, Any]
+    arguments: dict[str, Any], sent_body: dict[str, Any], serve: Serve, sent: list[httpx2.Request]
 ) -> None:
-    sent: list[httpx2.Request] = []
-
-    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY, sent)) as api:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(BLOCKING_BODY)) as api:
         status = await api.dns.set_blocking(**arguments)
 
     assert status.blocking == "disabled"
