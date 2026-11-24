@@ -34,9 +34,9 @@ uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without 
 Read ClientX from its public repo, as an outside user would: its [`llms.txt`](https://github.com/slatecipher/ClientX/blob/mainline/llms.txt) before writing endpoints, the [guide](https://github.com/slatecipher/ClientX/tree/mainline/docs) for each feature, and its source when the docs don't answer. When ClientX makes something awkward, say so before working around it: gravitywell doubles as ClientX's first real client, and a ClientX issue is often the better fix.
 
 - Write each sync endpoint on a `Resource` and its async twin on an `AsyncResource`, in the same change, so they never drift.
-- The base URL is the Pi-hole's own (`http://pi.hole`), without `/api`: put `/api` in each resource's prefix (`Resource(prefix="/api/stats")`). `PiHoleAuth` logs in at `/api/auth` on the requests' host.
+- The clients set the base URL's path to `/api` (`_BasePiHole.__init__`), so callers pass the Pi-hole's URL with or without it (`http://pi.hole`), and resource prefixes are relative to `/api` (`Resource(prefix="/stats")`). `PiHoleAuth` logs in at `/api/auth` on the requests' host.
 - An endpoint returns a model of its whole response body, named `<Endpoint>Response` (`VersionResponse`), with no `decoder=` to unwrap Pi-hole's `{"version": ...}` envelopes: unwrapping would drop siblings such as `processed`. Each one extends `BaseResponse` (`models/_base.py`), which holds `took`, the field every Pi-hole response has. Model only the fields used; Pydantic ignores the rest.
-- ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/api/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
+- ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
 
 ## Pi-hole
 

@@ -4,8 +4,8 @@ import ssl
 from types import TracebackType
 from typing import Any, cast
 
-import httpx2
 from clientx import AsyncClientX, ClientX
+from httpx2 import URL, AsyncBaseTransport, BaseTransport
 
 from gravitywell._auth import PiHoleAuth
 from gravitywell._resources.info import AsyncInfo, Info
@@ -15,7 +15,7 @@ from gravitywell._version import __version__
 # the clients override all four to log out of a `PiHoleAuth` session.
 
 
-class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
+class _BasePiHole[TransportT: BaseTransport | AsyncBaseTransport]:
     """The constructor `PiHole` and `AsyncPiHole` share, which requires `auth`.
 
     `TransportT` is the client's kind of transport, sync or async.
@@ -23,7 +23,7 @@ class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
 
     def __init__(
         self,
-        base_url: httpx2.URL | str,
+        base_url: URL | str,
         *,
         auth: PiHoleAuth,
         verify: ssl.SSLContext | bool = True,
@@ -44,8 +44,10 @@ class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
         allows only a few sessions at a time.
 
         Args:
-            base_url: The Pi-hole's URL, without `/api`, such as
-                `http://pi.hole`.
+            base_url: The Pi-hole's URL, such as `http://pi.hole`. The client
+                sets its path to `/api`, where the REST API is, so
+                `http://pi.hole/api` works too, and any other path is
+                replaced.
             auth: Logs in to the Pi-hole and sends its session on requests.
                 Closing the client logs out.
             verify: How to check the Pi-hole's HTTPS certificate: an
@@ -55,12 +57,13 @@ class _BasePiHole[TransportT: httpx2.BaseTransport | httpx2.AsyncBaseTransport]:
                 `httpx2.MockTransport` in tests. `AsyncPiHole` takes an async
                 one.
         """
+        base_url = URL(base_url).copy_with(path="/api")
         # `super()` is `ClientX` or `AsyncClientX`, next in the subclass's MRO,
         # which pyright can't see from this class.
         cast("Any", super()).__init__(base_url, auth=auth, verify=verify, transport=transport)
 
 
-class PiHole(_BasePiHole[httpx2.BaseTransport], ClientX, user_agent=f"gravitywell/{__version__}"):
+class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__version__}"):
     """A client for a Pi-hole's v6 REST API.
 
     Closing the client logs out of its session.
@@ -90,7 +93,7 @@ class PiHole(_BasePiHole[httpx2.BaseTransport], ClientX, user_agent=f"gravitywel
             self.auth.log_out(self)
 
 
-class AsyncPiHole(_BasePiHole[httpx2.AsyncBaseTransport], AsyncClientX, user_agent=f"gravitywell/{__version__}"):
+class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gravitywell/{__version__}"):
     """The async version of `PiHole`."""
 
     info = AsyncInfo()

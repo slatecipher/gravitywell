@@ -5,7 +5,7 @@ from clientx import AsyncResource, Resource, method
 from gravitywell.models import VersionResponse
 
 
-class Info(Resource, prefix="/api/info"):
+class Info(Resource, prefix="/info"):
     """Information about the Pi-hole."""
 
     @method.get("/version")
@@ -20,7 +20,7 @@ class Info(Resource, prefix="/api/info"):
         ...
 
 
-class AsyncInfo(AsyncResource, prefix="/api/info"):
+class AsyncInfo(AsyncResource, prefix="/info"):
     """Information about the Pi-hole."""
 
     @method.get("/version")
