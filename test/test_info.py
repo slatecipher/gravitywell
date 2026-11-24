@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 
 import httpx2
 import pytest
+from clientx.tools import ToolError, list_tools
 
 from gravitywell import AsyncPiHole, PiHole, PiHoleAuth
 from gravitywell.models import SystemInfoResponse, VersionResponse
@@ -241,3 +242,62 @@ def test_models_with_percent_names_read_back_the_same_from_their_dumps() -> None
 
     assert SystemInfoResponse.model_validate(system.model_dump(mode="json")) == system
     assert SystemInfoResponse.model_validate(system.model_dump(mode="json", by_alias=True)) == system
+
+
+# A diagnosis message the live test Pi-hole reported.
+MESSAGES_BODY = {
+    "messages": [
+        {
+            "id": 1,
+            "timestamp": 1795546369.5,
+            "type": "SUBNET",
+            "plain": "Client 192.168.1.235 is managed by 2 groups (IDs 11,12), all describing the same subnet.",
+            "html": "Client <code>192.168.1.235</code> is managed by 2 groups.",
+        }
+    ],
+    "took": 0.0003,
+}
+
+
+def test_messages_reads_the_diagnosis_messages(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(MESSAGES_BODY)) as api:
+        [message] = api.info.messages().messages
+
+    assert (message.id, message.type, message.timestamp) == (1, "SUBNET", datetime.fromtimestamp(1795546369.5, tz=UTC))
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/info/messages")
+
+
+@pytest.mark.anyio
+async def test_async_message_count_gets_the_count(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve({"count": 1, "took": 0.0001})) as api:
+        assert (await api.info.message_count()).count == 1
+
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/info/messages/count")
+
+
+def test_delete_messages_joins_the_ids_into_one_path_segment(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve({})) as api:
+        api.info.delete_messages([3, 4])
+
+    [request] = sent
+    assert (request.method, request.url.path) == ("DELETE", "/api/info/messages/3,4")
+
+
+@pytest.mark.anyio
+async def test_async_delete_messages_deletes_one_message(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve({})) as api:
+        await api.info.delete_messages([1])
+
+    [request] = sent
+    assert (request.method, request.url.path) == ("DELETE", "/api/info/messages/1")
+
+
+def test_ai_tools_need_at_least_one_message_id_to_delete() -> None:
+    tools = {tool.name: tool for tool in list_tools(PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD)))}
+
+    with pytest.raises(ToolError, match="at least 1 item"):
+        tools["info_delete_messages"].call({"ids": []})
+    assert (tools["info_delete_messages"].destructive, tools["info_delete_messages"].idempotent) == (True, True)
+    assert "info__delete_messages" not in tools

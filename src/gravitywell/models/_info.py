@@ -336,3 +336,35 @@ class MetricsResponse(BaseResponse):
     """FTL's DNS cache, DNS replies and DHCP counters."""
 
     metrics: Metrics
+
+
+class DiagnosisMessage(BaseModel):
+    """A problem the Pi-hole reports, as on its dashboard's diagnosis page."""
+
+    id: int = Field(description="The message's ID, to delete it by.")
+    timestamp: datetime = Field(description="When the Pi-hole reported it, in UTC.")
+    type: str = Field(
+        description="What it's about: `REGEX` (an invalid regex rule), `SUBNET` (a client matched by several subnet "
+        "clients), `HOSTNAME` (a client's hostname with invalid characters), `DNSMASQ_CONFIG` (an error in the DNS "
+        "server's configuration), `DNSMASQ_WARN` (a warning from the DNS server), `RATE_LIMIT` (a client limited for "
+        "sending too many queries), `LOAD` (load above the number of cores), `SHMEM` (shared memory running out), "
+        "`DISK` and `DISK_EXTENDED` (a disk running full), `LIST` (a list unavailable in the last gravity update), "
+        "`CERTIFICATE_DOMAIN_MISMATCH` (the HTTPS certificate doesn't match the domain), `CONNECTION_ERROR` (an "
+        "upstream server unreachable), `NTP` (a time synchronization problem), `VERIFY` (FTL's binary failed its "
+        "check), `GRAVITY_RESTORED` (a failed gravity update was rolled back) or `TELEPORTER_SKIPPED` (a setting a "
+        "Teleporter import skipped)."
+    )
+    plain: str = Field(description="The message, such as `Rate-limiting 192.168.2.42 for at least 5 seconds`.")
+    html: str = Field(description="The same message in HTML, sometimes with more detail, such as the limit applied.")
+
+
+class MessagesResponse(BaseResponse):
+    """The problems the Pi-hole reports."""
+
+    messages: list[DiagnosisMessage] = Field(description="The messages, oldest first. Empty if there are none.")
+
+
+class MessageCountResponse(BaseResponse):
+    """How many problems the Pi-hole reports."""
+
+    count: int = Field(description="Diagnosis messages.")
