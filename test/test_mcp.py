@@ -121,7 +121,8 @@ def runs(monkeypatch: pytest.MonkeyPatch) -> list[tuple[FastMCP, dict[str, Any]]
 @pytest.mark.parametrize(
     ("args", "env", "message"),
     [
-        ([], {"PIHOLE_URL": None}, "Missing option '--url' (env var: 'PIHOLE_URL')"),
+        # click 8.2 and later also name the environment variable.
+        ([], {"PIHOLE_URL": None}, "Missing option '--url'"),
         ([], {"PIHOLE_PASSWORD": None}, "Set PIHOLE_PASSWORD to an application password"),
         (["--areas", "stats,nope"], {}, "Invalid value for --areas: Unknown areas: nope."),
         (["--verify", "/no/such/ca.pem"], {}, "Invalid value for --verify"),
