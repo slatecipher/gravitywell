@@ -10,6 +10,7 @@ from httpx2 import URL, AsyncBaseTransport, BaseTransport
 from gravitywell._auth import PiHoleAuth
 from gravitywell._resources.dns import AsyncDns, Dns
 from gravitywell._resources.info import AsyncInfo, Info
+from gravitywell._resources.stats import AsyncStats, Stats
 from gravitywell._version import __version__
 
 # httpx2's `__exit__` doesn't call `close()`, nor `__aexit__` `aclose()`, so
@@ -72,6 +73,7 @@ class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__ve
 
     dns = Dns()
     info = Info()
+    stats = Stats()
 
     def close(self) -> None:
         try:
@@ -100,6 +102,7 @@ class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gr
 
     dns = AsyncDns()
     info = AsyncInfo()
+    stats = AsyncStats()
 
     async def aclose(self) -> None:
         try:

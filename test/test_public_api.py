@@ -21,7 +21,11 @@ def test_models_exports() -> None:
         [
             "BaseResponse",
             "BlockingResponse",
+            "ClientSummary",
             "ComponentVersion",
+            "GravitySummary",
+            "QuerySummary",
+            "SummaryResponse",
             "Session",
             "SessionResponse",
             "LocalVersion",
