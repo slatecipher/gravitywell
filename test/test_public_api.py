@@ -77,6 +77,7 @@ def test_models_exports() -> None:
             "GravitySummary",
             "Group",
             "GroupKey",
+            "GravityUpdate",
             "GroupsResponse",
             "HistoryClient",
             "HostInfo",

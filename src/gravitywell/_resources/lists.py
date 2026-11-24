@@ -61,10 +61,10 @@ class Lists(Resource, prefix="/lists"):
     ) -> ChangedListsResponse:
         """Subscribe the Pi-hole to one or more blocklists or allowlists.
 
-        A new list's domains take effect only after the next gravity update
-        downloads it. Each URL is saved or refused on its own, such as one
-        it already subscribes to, and `processed` says which; if all are
-        refused, it answers with an error.
+        A new list's domains take effect only after a gravity update, from
+        the update gravity endpoint, downloads it. Each URL is saved or
+        refused on its own, such as one it already subscribes to, and
+        `processed` says which; if all are refused, it answers with an error.
 
         Args:
             list_type: `block` for blocklists, whose domains are blocked, or
@@ -95,7 +95,7 @@ class Lists(Resource, prefix="/lists"):
         are. If the Pi-hole doesn't subscribe to the list, it subscribes. A
         list's type can't change: delete it and add it with the other type.
         It takes effect right away, though a list never downloaded needs a
-        gravity update first.
+        gravity update first, from the update gravity endpoint.
 
         Args:
             address: The list's URL, such as
@@ -192,10 +192,10 @@ class AsyncLists(AsyncResource, prefix="/lists"):
     ) -> ChangedListsResponse:
         """Subscribe the Pi-hole to one or more blocklists or allowlists.
 
-        A new list's domains take effect only after the next gravity update
-        downloads it. Each URL is saved or refused on its own, such as one
-        it already subscribes to, and `processed` says which; if all are
-        refused, it answers with an error.
+        A new list's domains take effect only after a gravity update, from
+        the update gravity endpoint, downloads it. Each URL is saved or
+        refused on its own, such as one it already subscribes to, and
+        `processed` says which; if all are refused, it answers with an error.
 
         Args:
             list_type: `block` for blocklists, whose domains are blocked, or
@@ -226,7 +226,7 @@ class AsyncLists(AsyncResource, prefix="/lists"):
         are. If the Pi-hole doesn't subscribe to the list, it subscribes. A
         list's type can't change: delete it and add it with the other type.
         It takes effect right away, though a list never downloaded needs a
-        gravity update first.
+        gravity update first, from the update gravity endpoint.
 
         Args:
             address: The list's URL, such as

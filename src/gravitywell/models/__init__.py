@@ -11,6 +11,7 @@ Example:
         body: VersionResponse = api.info.version()
 """
 
+from gravitywell.models._action import GravityUpdate
 from gravitywell.models._auth import Session, SessionResponse
 from gravitywell.models._base import BaseResponse, ProcessedItem, ProcessedItems, ProcessingError
 from gravitywell.models._clients import (
@@ -143,6 +144,8 @@ from gravitywell.models._stats import (
 from gravitywell.models._time import TimeRange
 
 __all__ = [
+    # gravitywell.models._action
+    "GravityUpdate",
     # gravitywell.models._auth
     "Session",
     "SessionResponse",
