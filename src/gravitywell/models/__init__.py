@@ -21,6 +21,7 @@ from gravitywell.models._clients import (
     ClientSuggestionsResponse,
     ConfiguredClient,
 )
+from gravitywell.models._dhcp import DhcpLease, DhcpLeasesResponse
 from gravitywell.models._dns import BlockingResponse
 from gravitywell.models._domains import (
     ChangedDomainsResponse,
@@ -83,6 +84,20 @@ from gravitywell.models._info import (
     Versions,
 )
 from gravitywell.models._lists import ChangedListsResponse, ListKey, ListsResponse, ListType, SubscribedList
+from gravitywell.models._network import (
+    DeviceAddress,
+    Gateway,
+    GatewayResponse,
+    InterfaceAddress,
+    InterfacesResponse,
+    InterfaceStats,
+    InterfaceTraffic,
+    NetworkDevice,
+    NetworkDevicesResponse,
+    NetworkInterface,
+    Route,
+    RoutesResponse,
+)
 from gravitywell.models._queries import (
     DnssecStatus,
     ExtendedDnsError,
@@ -144,6 +159,9 @@ __all__ = [
     "ClientSuggestionsResponse",
     "ClientsResponse",
     "ConfiguredClient",
+    # gravitywell.models._dhcp
+    "DhcpLease",
+    "DhcpLeasesResponse",
     # gravitywell.models._domains
     "ChangedDomainsResponse",
     "DomainRule",
@@ -211,6 +229,19 @@ __all__ = [
     "ListsResponse",
     "ListType",
     "SubscribedList",
+    # gravitywell.models._network
+    "DeviceAddress",
+    "Gateway",
+    "GatewayResponse",
+    "InterfaceAddress",
+    "InterfaceStats",
+    "InterfaceTraffic",
+    "InterfacesResponse",
+    "NetworkDevice",
+    "NetworkDevicesResponse",
+    "NetworkInterface",
+    "Route",
+    "RoutesResponse",
     # gravitywell.models._queries
     "DnssecStatus",
     "ExtendedDnsError",
