@@ -32,7 +32,10 @@ class Action(Resource, prefix="/action"):
     """Actions on the Pi-hole: update gravity, restart FTL, and flush data."""
 
     @method.post(
-        "/gravity", decoder=_gravity_update, timeout=_GRAVITY_TIMEOUT, tool_options=ToolOptions(idempotent=True)
+        "/gravity",
+        decoder=_gravity_update,
+        timeout=_GRAVITY_TIMEOUT,
+        tool_options=ToolOptions(destructive=True, idempotent=True),
     )
     def update_gravity(self) -> GravityUpdate:
         """Update gravity, downloading the lists and rebuilding their domains.
@@ -40,9 +43,11 @@ class Action(Resource, prefix="/action"):
         Run it after adding a list or changing its URL: a list's domains take
         effect only once an update downloads them. It takes seconds to
         minutes, depending on the lists, and returns each list's download
-        status and domain count. Rules, groups and clients stay as they are.
-        Only one update runs at a time: another answers with an error (409).
-        A failed update still returns, with `succeeded` false.
+        status and domain count. It replaces the domains of the last update,
+        so a domain a list dropped stops being blocked, though rules, groups
+        and clients stay as they are. Only one update runs at a time: another
+        answers with an error (409). A failed update still returns, with
+        `succeeded` false.
         """
         ...
 
@@ -88,7 +93,10 @@ class AsyncAction(AsyncResource, prefix="/action"):
     """Actions on the Pi-hole: update gravity, restart FTL, and flush data."""
 
     @method.post(
-        "/gravity", decoder=_gravity_update, timeout=_GRAVITY_TIMEOUT, tool_options=ToolOptions(idempotent=True)
+        "/gravity",
+        decoder=_gravity_update,
+        timeout=_GRAVITY_TIMEOUT,
+        tool_options=ToolOptions(destructive=True, idempotent=True),
     )
     async def update_gravity(self) -> GravityUpdate:
         """Update gravity, downloading the lists and rebuilding their domains.
@@ -96,9 +104,11 @@ class AsyncAction(AsyncResource, prefix="/action"):
         Run it after adding a list or changing its URL: a list's domains take
         effect only once an update downloads them. It takes seconds to
         minutes, depending on the lists, and returns each list's download
-        status and domain count. Rules, groups and clients stay as they are.
-        Only one update runs at a time: another answers with an error (409).
-        A failed update still returns, with `succeeded` false.
+        status and domain count. It replaces the domains of the last update,
+        so a domain a list dropped stops being blocked, though rules, groups
+        and clients stay as they are. Only one update runs at a time: another
+        answers with an error (409). A failed update still returns, with
+        `succeeded` false.
         """
         ...
 
