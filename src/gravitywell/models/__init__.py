@@ -12,7 +12,13 @@ Example:
 """
 
 from gravitywell.models._action import GravityUpdate
-from gravitywell.models._auth import Session, SessionResponse
+from gravitywell.models._auth import (
+    ActiveSession,
+    ActiveSessionsResponse,
+    Session,
+    SessionResponse,
+    SessionTls,
+)
 from gravitywell.models._base import BaseResponse, ProcessedItem, ProcessedItems, ProcessingError
 from gravitywell.models._clients import (
     ChangedClientsResponse,
@@ -115,6 +121,15 @@ from gravitywell.models._network import (
     Route,
     RoutesResponse,
 )
+from gravitywell.models._padd import (
+    PaddCache,
+    PaddConfig,
+    PaddInterface,
+    PaddInterfaces,
+    PaddQueries,
+    PaddResponse,
+    PaddSensors,
+)
 from gravitywell.models._queries import (
     DnssecStatus,
     ExtendedDnsError,
@@ -156,14 +171,22 @@ from gravitywell.models._stats import (
     UpstreamsResponse,
     UpstreamStatistics,
 )
+from gravitywell.models._teleporter import (
+    GravityTables,
+    RestoreParts,
+    RestoreResponse,
+)
 from gravitywell.models._time import TimeRange
 
 __all__ = [
     # gravitywell.models._action
     "GravityUpdate",
     # gravitywell.models._auth
+    "ActiveSession",
+    "ActiveSessionsResponse",
     "Session",
     "SessionResponse",
+    "SessionTls",
     # gravitywell.models._base
     "BaseResponse",
     "ProcessedItem",
@@ -278,6 +301,14 @@ __all__ = [
     "NetworkInterface",
     "Route",
     "RoutesResponse",
+    # gravitywell.models._padd
+    "PaddCache",
+    "PaddConfig",
+    "PaddInterface",
+    "PaddInterfaces",
+    "PaddQueries",
+    "PaddResponse",
+    "PaddSensors",
     # gravitywell.models._queries
     "DnssecStatus",
     "ExtendedDnsError",
@@ -316,6 +347,10 @@ __all__ = [
     "Upstream",
     "UpstreamStatistics",
     "UpstreamsResponse",
+    # gravitywell.models._teleporter
+    "GravityTables",
+    "RestoreParts",
+    "RestoreResponse",
     # gravitywell.models._time
     "TimeRange",
 ]

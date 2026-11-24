@@ -9,6 +9,7 @@ from httpx2 import URL, AsyncBaseTransport, BaseTransport
 
 from gravitywell._auth import PiHoleAuth
 from gravitywell._resources.action import Action, AsyncAction
+from gravitywell._resources.auth import AsyncSessions, Sessions
 from gravitywell._resources.clients import AsyncClients, Clients
 from gravitywell._resources.config import AsyncConfig, Config
 from gravitywell._resources.dhcp import AsyncDhcp, Dhcp
@@ -20,9 +21,11 @@ from gravitywell._resources.info import AsyncInfo, Info
 from gravitywell._resources.lists import AsyncLists, Lists
 from gravitywell._resources.logs import AsyncLogs, Logs
 from gravitywell._resources.network import AsyncNetwork, Network
+from gravitywell._resources.padd import AsyncPadd, Padd
 from gravitywell._resources.queries import AsyncQueries, Queries
 from gravitywell._resources.search import AsyncSearch, Search
 from gravitywell._resources.stats import AsyncStats, Stats
+from gravitywell._resources.teleporter import AsyncTeleporter, Teleporter
 from gravitywell._version import __version__
 
 # httpx2's `__exit__` doesn't call `close()`, nor `__aexit__` `aclose()`, so
@@ -95,9 +98,12 @@ class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__ve
     lists = Lists()
     logs = Logs()
     network = Network()
+    padd = Padd()
     queries = Queries()
     search = Search()
+    sessions = Sessions()
     stats = Stats()
+    teleporter = Teleporter()
 
     def close(self) -> None:
         try:
@@ -136,9 +142,12 @@ class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gr
     lists = AsyncLists()
     logs = AsyncLogs()
     network = AsyncNetwork()
+    padd = AsyncPadd()
     queries = AsyncQueries()
     search = AsyncSearch()
+    sessions = AsyncSessions()
     stats = AsyncStats()
+    teleporter = AsyncTeleporter()
 
     async def aclose(self) -> None:
         try:
