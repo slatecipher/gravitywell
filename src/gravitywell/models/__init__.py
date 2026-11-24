@@ -84,6 +84,7 @@ from gravitywell.models._info import (
     Versions,
 )
 from gravitywell.models._lists import ChangedListsResponse, ListKey, ListsResponse, ListType, SubscribedList
+from gravitywell.models._logs import LogLine, LogResponse
 from gravitywell.models._network import (
     DeviceAddress,
     Gateway,
@@ -229,6 +230,9 @@ __all__ = [
     "ListsResponse",
     "ListType",
     "SubscribedList",
+    # gravitywell.models._logs
+    "LogLine",
+    "LogResponse",
     # gravitywell.models._network
     "DeviceAddress",
     "Gateway",
