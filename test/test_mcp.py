@@ -1,6 +1,7 @@
 import runpy
 import sys
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import httpx2
@@ -171,6 +172,55 @@ def test_verify_takes_true_or_false(
     result = CliRunner().invoke(main, ["--verify", value], env=ENV)
 
     assert (result.exit_code, created) == (0, [verify])
+
+
+@pytest.fixture
+def created(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, str]]:
+    """Record the URL and password each client the command creates gets."""
+    calls: list[tuple[str, str]] = []
+
+    def pi_hole(url: str, **kwargs: Any) -> AsyncPiHole:
+        calls.append(("url", url))
+        return AsyncPiHole(url, **kwargs)
+
+    def pi_hole_auth(password: str) -> PiHoleAuth:
+        calls.append(("password", password))
+        return PiHoleAuth(password)
+
+    monkeypatch.setattr("gravitywell.mcp.AsyncPiHole", pi_hole)
+    monkeypatch.setattr("gravitywell.mcp.PiHoleAuth", pi_hole_auth)
+    return calls
+
+
+def test_an_env_file_supplies_the_settings_as_written(
+    tmp_path: Path, created: list[tuple[str, str]], runs: list[tuple[FastMCP, dict[str, Any]]]
+) -> None:
+    env_file = tmp_path / "pihole.env"
+    env_file.write_text("# The test Pi-hole\nPIHOLE_URL=http://pi.hole\nPIHOLE_PASSWORD=pa${HOME}ss\n")
+    unset = dict.fromkeys(ENV)
+
+    result = CliRunner().invoke(main, ["--env-file", str(env_file)], env=unset)
+
+    assert result.exit_code == 0, result.output
+    assert sorted(created) == [("password", "pa${HOME}ss"), ("url", "http://pi.hole")]
+
+
+def test_variables_already_set_win_over_the_env_file(
+    tmp_path: Path, created: list[tuple[str, str]], runs: list[tuple[FastMCP, dict[str, Any]]]
+) -> None:
+    env_file = tmp_path / "pihole.env"
+    env_file.write_text("PIHOLE_URL=http://from-the-file\nPIHOLE_PASSWORD=from-the-file\n")
+
+    result = CliRunner().invoke(main, ["--env-file", str(env_file)], env=ENV)
+
+    assert result.exit_code == 0, result.output
+    assert sorted(created) == [("password", PASSWORD), ("url", BASE_URL)]
+
+
+def test_a_missing_env_file_is_refused(tmp_path: Path, runs: list[tuple[FastMCP, dict[str, Any]]]) -> None:
+    result = CliRunner().invoke(main, ["--env-file", str(tmp_path / "missing.env")], env=ENV)
+
+    assert (result.exit_code, "does not exist" in result.output, runs) == (2, True, [])
 
 
 def test_python_dash_m_runs_the_command(

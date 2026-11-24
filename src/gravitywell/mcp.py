@@ -1,9 +1,11 @@
 """An MCP server for gravitywell's AI tools, built on FastMCP.
 
 Run it as `gravitywell-mcp`, or `python -m gravitywell.mcp`, with the Pi-hole's
-URL and an application password in the environment:
+URL and an application password in the environment, or in a `.env` file that
+`--env-file` names:
 
     PIHOLE_URL=http://pi.hole PIHOLE_PASSWORD=... gravitywell-mcp --areas stats
+    gravitywell-mcp --env-file ~/.config/gravitywell/pihole.env
 
 It registers the read-only tools by default. `--allow-writes` adds the tools
 that change something without deleting or overwriting anything, such as adding
@@ -21,6 +23,7 @@ from contextlib import asynccontextmanager
 import click
 from clientx.fastmcp import fastmcp_tool
 from clientx.tools import Tool, list_tools
+from dotenv import load_dotenv
 from fastmcp import FastMCP
 
 from gravitywell import AsyncPiHole, PiHoleAuth, __version__
@@ -109,6 +112,16 @@ def create_server(
     )
 
 
+def _load_env_file(ctx: click.Context, param: click.Parameter, value: str | None) -> None:
+    """Load a `.env` file before the options that fall back to its variables.
+
+    Variables already in the environment win, and values are read as written,
+    without `${...}` expansion, so a password with a `$` in it stays intact.
+    """
+    if value is not None:
+        load_dotenv(value, override=False, interpolate=False)
+
+
 def _areas(ctx: click.Context, param: click.Parameter, value: str | None) -> list[str] | None:
     if value is None:
         return None
@@ -132,6 +145,14 @@ def _is_loopback(host: str) -> bool:
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"], "max_content_width": 100})
+@click.option(
+    "--env-file",
+    type=click.Path(exists=True, dir_okay=False),
+    callback=_load_env_file,
+    is_eager=True,
+    expose_value=False,
+    help="A .env file to read PIHOLE_URL, PIHOLE_PASSWORD and PIHOLE_VERIFY from. Variables already set win.",
+)
 @click.option(
     "--url", envvar="PIHOLE_URL", show_envvar=True, required=True, help="The Pi-hole's URL, such as http://pi.hole."
 )
@@ -180,12 +201,13 @@ def main(
     """Serve gravitywell's AI tools for a Pi-hole over MCP.
 
     It serves only read-only tools unless --allow-writes or --allow-destructive
-    allows more. Set PIHOLE_PASSWORD to an application password: it's read from
-    the environment only, to keep it out of process listings.
+    allows more. Set PIHOLE_PASSWORD to an application password, in the
+    environment or a file --env-file names: it's never an option, to keep it out
+    of process listings.
     """
     password = os.environ.get("PIHOLE_PASSWORD")
     if password is None:
-        raise click.UsageError("Set PIHOLE_PASSWORD to an application password.")
+        raise click.UsageError("Set PIHOLE_PASSWORD to an application password, or name a file with --env-file.")
     try:
         verified = _verify(verify)
     except OSError as error:
