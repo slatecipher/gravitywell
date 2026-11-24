@@ -4,7 +4,14 @@ from typing import Annotated
 
 from clientx import AsyncResource, Query, Resource, method
 
-from gravitywell.models import SummaryResponse, TopClientsResponse, TopDomainsResponse
+from gravitywell.models import (
+    QueryTypesResponse,
+    RecentBlockedResponse,
+    SummaryResponse,
+    TopClientsResponse,
+    TopDomainsResponse,
+    UpstreamsResponse,
+)
 
 
 class Stats(Resource, prefix="/stats"):
@@ -67,6 +74,48 @@ class Stats(Resource, prefix="/stats"):
         """
         ...
 
+    @method.get("/upstreams")
+    def upstreams(self) -> UpstreamsResponse:
+        """Fetch the Pi-hole's upstream DNS servers, with counts and speeds.
+
+        Upstream servers answer the queries the Pi-hole doesn't block or
+        answer from its cache. The list starts with `blocklist` (queries
+        blocked) and `cache` (queries answered from the cache), then each
+        server that answered a query in the history the Pi-hole keeps, the
+        last 24 hours by default, with its average response time. Use it to
+        see which servers the Pi-hole forwards to, and whether one is slow.
+        It changes nothing.
+        """
+        ...
+
+    @method.get("/query_types")
+    def query_types(self) -> QueryTypesResponse:
+        """Fetch how many queries of each DNS record type the Pi-hole got.
+
+        The counts cover the history the Pi-hole keeps, the last 24 hours by
+        default: `A` and `AAAA` for IPv4 and IPv6 addresses, `PTR` for
+        reverse lookups, `HTTPS` for HTTPS service records, and so on. The
+        stats summary holds the same counts alongside its totals; use this
+        for the record types alone. It changes nothing.
+        """
+        ...
+
+    @method.get("/recent_blocked")
+    def recent_blocked(self, count: Annotated[int, Query(ge=1)] = 1) -> RecentBlockedResponse:
+        """Fetch the domains the Pi-hole blocked most recently.
+
+        Newest first, one entry per blocked query, so a domain blocked again
+        appears again. Use it to see what was just blocked, such as when a
+        website or app stops working. `hidden` stands for a domain the
+        privacy level hid, and the list is empty if the privacy level hides
+        domains. It changes nothing.
+
+        Args:
+            count: How many blocked queries to return, at least 1. 1 by
+                default.
+        """
+        ...
+
 
 class AsyncStats(AsyncResource, prefix="/stats"):
     """Statistics about the Pi-hole's activity."""
@@ -125,5 +174,47 @@ class AsyncStats(AsyncResource, prefix="/stats"):
             blocked: `true` to rank clients by blocked queries only, `false`
                 (the default) by all their queries.
             count: How many clients to return, at least 1. 10 by default.
+        """
+        ...
+
+    @method.get("/upstreams")
+    async def upstreams(self) -> UpstreamsResponse:
+        """Fetch the Pi-hole's upstream DNS servers, with counts and speeds.
+
+        Upstream servers answer the queries the Pi-hole doesn't block or
+        answer from its cache. The list starts with `blocklist` (queries
+        blocked) and `cache` (queries answered from the cache), then each
+        server that answered a query in the history the Pi-hole keeps, the
+        last 24 hours by default, with its average response time. Use it to
+        see which servers the Pi-hole forwards to, and whether one is slow.
+        It changes nothing.
+        """
+        ...
+
+    @method.get("/query_types")
+    async def query_types(self) -> QueryTypesResponse:
+        """Fetch how many queries of each DNS record type the Pi-hole got.
+
+        The counts cover the history the Pi-hole keeps, the last 24 hours by
+        default: `A` and `AAAA` for IPv4 and IPv6 addresses, `PTR` for
+        reverse lookups, `HTTPS` for HTTPS service records, and so on. The
+        stats summary holds the same counts alongside its totals; use this
+        for the record types alone. It changes nothing.
+        """
+        ...
+
+    @method.get("/recent_blocked")
+    async def recent_blocked(self, count: Annotated[int, Query(ge=1)] = 1) -> RecentBlockedResponse:
+        """Fetch the domains the Pi-hole blocked most recently.
+
+        Newest first, one entry per blocked query, so a domain blocked again
+        appears again. Use it to see what was just blocked, such as when a
+        website or app stops working. `hidden` stands for a domain the
+        privacy level hid, and the list is empty if the privacy level hides
+        domains. It changes nothing.
+
+        Args:
+            count: How many blocked queries to return, at least 1. 1 by
+                default.
         """
         ...

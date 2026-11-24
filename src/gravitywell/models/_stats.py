@@ -21,6 +21,11 @@ def _minus_one_is_none(value: object) -> object:
 # A plain alias, not a `type` statement, so JSON schemas write it in place.
 _HiddenTotal = Annotated[int | None, BeforeValidator(_minus_one_is_none)]
 
+_QUERY_TYPES = (
+    "Queries by record type: `A`, `AAAA`, `ANY`, `SRV`, `SOA`, `PTR`, `TXT`, `NAPTR`, `MX`, `DS`, `RRSIG`, "
+    "`DNSKEY`, `NS`, `SVCB`, `HTTPS`, and `OTHER` for the rest."
+)
+
 
 class QuerySummary(BaseModel):
     """DNS queries in the Pi-hole's history, the last 24 hours by default."""
@@ -32,10 +37,7 @@ class QuerySummary(BaseModel):
     forwarded: int = Field(description="Queries answered by an upstream DNS server.")
     cached: int = Field(description="Queries answered from the cache or the Pi-hole's own configuration.")
     frequency: float = Field(description="Queries per second, averaged over the last 30 seconds.")
-    types: dict[str, int] = Field(
-        description="Queries by record type: `A`, `AAAA`, `ANY`, `SRV`, `SOA`, `PTR`, `TXT`, `NAPTR`, `MX`, `DS`, "
-        "`RRSIG`, `DNSKEY`, `NS`, `SVCB`, `HTTPS`, and `OTHER` for the rest."
-    )
+    types: dict[str, int] = Field(description=_QUERY_TYPES)
     status: dict[str, int] = Field(
         description="Queries by what the Pi-hole did with them. Blocked: `GRAVITY` (on a blocklist), `REGEX` and "
         "`DENYLIST` (by a domain rule), `GRAVITY_CNAME`, `REGEX_CNAME` and `DENYLIST_CNAME` (the same, found in a "
@@ -116,4 +118,59 @@ class TopClientsResponse(BaseResponse):
     )
     blocked_queries: _HiddenTotal = Field(
         description="Blocked queries in the Pi-hole's history, or `null` if its privacy level hides clients."
+    )
+
+
+class QueryTypesResponse(BaseResponse):
+    """The Pi-hole's queries by DNS record type."""
+
+    types: dict[str, int] = Field(description=_QUERY_TYPES)
+
+
+class UpstreamStatistics(BaseModel):
+    """How fast an upstream DNS server answers."""
+
+    response: float = Field(
+        description="Average response time, in seconds, such as `0.016`. `0` for `blocklist` and `cache`, and for a "
+        "server with no replies yet."
+    )
+    variance: float = Field(
+        description="Despite its name, the uncertainty of `response` (its standard error), in seconds. `0` for "
+        "`blocklist` and `cache`, and for a server with fewer than two replies."
+    )
+
+
+class Upstream(BaseModel):
+    """Where the Pi-hole sent queries, and how many."""
+
+    ip: str | None = Field(
+        description="The upstream DNS server's IP address, such as `8.8.4.4`, or `blocklist` for the queries the "
+        "Pi-hole blocked and `cache` for those it answered from its cache."
+    )
+    name: str | None = Field(
+        description="The server's hostname, such as `dns.google`, if known; `blocklist` or `cache` for those entries."
+    )
+    port: int = Field(description="The server's port, such as `53`, or `-1` for `blocklist` and `cache`.")
+    count: int = Field(description="Queries it handled.")
+    statistics: UpstreamStatistics
+
+
+class UpstreamsResponse(BaseResponse):
+    """Where the Pi-hole's queries went: blocked, cached, or to which server."""
+
+    upstreams: list[Upstream] = Field(
+        description="`blocklist` and `cache` first, then each upstream server that answered a query, most queries "
+        "first."
+    )
+    forwarded_queries: int = Field(description="Queries answered by an upstream server.")
+    total_queries: int = Field(description="All queries in the Pi-hole's history.")
+
+
+class RecentBlockedResponse(BaseResponse):
+    """The domains the Pi-hole blocked most recently."""
+
+    blocked: list[str] = Field(
+        description="Up to `count` blocked domains, most recent first, once per query, so a domain can appear more "
+        "than once. `hidden` stands for a domain the privacy level hid when it was queried, and the list is empty if "
+        "the privacy level hides domains."
     )

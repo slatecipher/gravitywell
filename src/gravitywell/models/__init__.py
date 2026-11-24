@@ -19,11 +19,16 @@ from gravitywell.models._stats import (
     ClientSummary,
     GravitySummary,
     QuerySummary,
+    QueryTypesResponse,
+    RecentBlockedResponse,
     SummaryResponse,
     TopClient,
     TopClientsResponse,
     TopDomain,
     TopDomainsResponse,
+    Upstream,
+    UpstreamsResponse,
+    UpstreamStatistics,
 )
 
 __all__ = [
@@ -43,9 +48,14 @@ __all__ = [
     "ClientSummary",
     "GravitySummary",
     "QuerySummary",
+    "QueryTypesResponse",
+    "RecentBlockedResponse",
     "SummaryResponse",
     "TopClient",
     "TopClientsResponse",
     "TopDomain",
     "TopDomainsResponse",
+    "Upstream",
+    "UpstreamStatistics",
+    "UpstreamsResponse",
 ]

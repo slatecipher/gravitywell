@@ -133,3 +133,88 @@ def test_totals_of_minus_one_read_as_hidden_by_the_privacy_level(serve: Serve) -
         top = api.stats.top_domains()
 
     assert (top.domains, top.total_queries, top.blocked_queries) == ([], None, None)
+
+
+# The live test Pi-hole's answers.
+UPSTREAMS_BODY = {
+    "upstreams": [
+        {"ip": "blocklist", "name": "blocklist", "port": -1, "count": 5, "statistics": {"response": 0, "variance": 0}},
+        {"ip": "cache", "name": "cache", "port": -1, "count": 10, "statistics": {"response": 0, "variance": 0}},
+        {
+            "ip": "8.8.4.4",
+            "name": "dns.google",
+            "port": 53,
+            "count": 28,
+            "statistics": {"response": 0.016012964248657228, "variance": 0.0017079313165119022},
+        },
+    ],
+    "total_queries": 43,
+    "forwarded_queries": 28,
+    "took": 0.00008,
+}
+QUERY_TYPES_BODY = {"types": {"A": 17, "AAAA": 7, "PTR": 4, "HTTPS": 4, "OTHER": 0}, "took": 0.00009}
+RECENT_BLOCKED_BODY = {"blocked": ["ad.doubleclick.net", "adservice.google.com"], "took": 0.00005}
+
+
+def test_upstreams_gets_stats_upstreams_and_reads_the_servers(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(UPSTREAMS_BODY)) as api:
+        upstreams = api.stats.upstreams()
+
+    assert [(item.ip, item.port, item.count) for item in upstreams.upstreams] == [
+        ("blocklist", -1, 5),
+        ("cache", -1, 10),
+        ("8.8.4.4", 53, 28),
+    ]
+    assert upstreams.upstreams[2].statistics.response == 0.016012964248657228
+    assert (upstreams.forwarded_queries, upstreams.total_queries) == (28, 43)
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/upstreams")
+
+
+@pytest.mark.anyio
+async def test_async_upstreams_gets_stats_upstreams(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(UPSTREAMS_BODY)) as api:
+        upstreams = await api.stats.upstreams()
+
+    assert upstreams.upstreams[2].name == "dns.google"
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/upstreams")
+
+
+def test_query_types_gets_stats_query_types(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(QUERY_TYPES_BODY)) as api:
+        types = api.stats.query_types().types
+
+    assert (types["A"], types["AAAA"]) == (17, 7)
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/query_types")
+
+
+@pytest.mark.anyio
+async def test_async_query_types_gets_stats_query_types(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(QUERY_TYPES_BODY)) as api:
+        types = (await api.stats.query_types()).types
+
+    assert types["PTR"] == 4
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/query_types")
+
+
+def test_recent_blocked_asks_for_one_domain_by_default(serve: Serve, sent: list[httpx2.Request]) -> None:
+    with PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(RECENT_BLOCKED_BODY)) as api:
+        blocked = api.stats.recent_blocked().blocked
+
+    assert blocked == ["ad.doubleclick.net", "adservice.google.com"]
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/recent_blocked")
+    assert dict(request.url.params) == {"count": "1"}
+
+
+@pytest.mark.anyio
+async def test_async_recent_blocked_sends_count(serve: Serve, sent: list[httpx2.Request]) -> None:
+    async with AsyncPiHole(BASE_URL, auth=PiHoleAuth(PASSWORD), transport=serve(RECENT_BLOCKED_BODY)) as api:
+        await api.stats.recent_blocked(count=2)
+
+    [request] = sent
+    assert (request.method, request.url.path) == ("GET", "/api/stats/recent_blocked")
+    assert dict(request.url.params) == {"count": "2"}
