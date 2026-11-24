@@ -36,6 +36,7 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 - Write each sync endpoint on a `Resource` and its async twin on an `AsyncResource`, in the same change, so they never drift.
 - The clients set the base URL's path to `/api` (`_BasePiHole.__init__`), so callers pass the Pi-hole's URL with or without it (`http://pi.hole`), and resource prefixes are relative to `/api` (`Resource(prefix="/stats")`). `PiHoleAuth` logs in at `/api/auth` on the requests' host.
 - An endpoint returns a model of its whole response body, named `<Endpoint>Response` (`VersionResponse`), with no `decoder=` to unwrap Pi-hole's `{"version": ...}` envelopes: unwrapping would drop siblings such as `processed`. Each one extends `BaseResponse` (`models/_base.py`), which holds `took`, the field every Pi-hole response has. Model only the fields used; Pydantic ignores the rest.
+- Set `tool_options=ToolOptions(...)` (`clientx.tools`) where the HTTP method's AI tool hints are wrong, such as a POST that overwrites a setting: `set_blocking` is destructive and idempotent. ClientX's `list_tools` shows what a model sees: check new endpoints' descriptions and schemas with it.
 - ClientX joins a resource's prefix and path with `/`, so declare Pi-hole's `:batchDelete` paths with the full path (`"/domains:batchDelete"`) on a resource without that prefix (ClientX #173).
 
 ## Pi-hole
@@ -43,6 +44,7 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 - Send the session in the `X-FTL-SID` header, never as the `sid` query parameter: httpx2 logs full URLs at `INFO`.
 - Pi-hole limits concurrent sessions: log in once per client, reuse the session, log in again only after a 401, and log out on close. httpx2's `__exit__` doesn't call `close()` (nor `__aexit__` `aclose()`), so the clients override all four.
 - A Pi-hole with no password answers a login with a `null` session ID: send no `X-FTL-SID` header then.
+- Read an endpoint's spec from the Pi-hole itself (`/api/docs/specs/<area>.yaml`, no login needed), and FTL's source (`src/api/`) when the spec is vague. They can disagree: for a DNS server that isn't running, FTL sends the blocking status `failure` while the spec says `failed`. Accept what FTL sends.
 - Brand rules for third-party apps: never call gravitywell "official" or suggest Pi-hole makes or supports it; use "Pi-hole" only to say what it works with; no Pi-hole logo or a lookalike.
 
 ## Tests

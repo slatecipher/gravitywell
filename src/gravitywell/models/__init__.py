@@ -13,6 +13,7 @@ Example:
 
 from gravitywell.models._auth import Session, SessionResponse
 from gravitywell.models._base import BaseResponse
+from gravitywell.models._dns import BlockingResponse
 from gravitywell.models._info import ComponentVersion, LocalVersion, VersionResponse, Versions
 
 __all__ = [
@@ -21,6 +22,8 @@ __all__ = [
     "SessionResponse",
     # gravitywell.models._base
     "BaseResponse",
+    # gravitywell.models._dns
+    "BlockingResponse",
     # gravitywell.models._info
     "ComponentVersion",
     "LocalVersion",

@@ -8,6 +8,7 @@ from clientx import AsyncClientX, ClientX
 from httpx2 import URL, AsyncBaseTransport, BaseTransport
 
 from gravitywell._auth import PiHoleAuth
+from gravitywell._resources.dns import AsyncDns, Dns
 from gravitywell._resources.info import AsyncInfo, Info
 from gravitywell._version import __version__
 
@@ -69,6 +70,7 @@ class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__ve
     Closing the client logs out of its session.
     """
 
+    dns = Dns()
     info = Info()
 
     def close(self) -> None:
@@ -96,6 +98,7 @@ class PiHole(_BasePiHole[BaseTransport], ClientX, user_agent=f"gravitywell/{__ve
 class AsyncPiHole(_BasePiHole[AsyncBaseTransport], AsyncClientX, user_agent=f"gravitywell/{__version__}"):
     """The async version of `PiHole`."""
 
+    dns = AsyncDns()
     info = AsyncInfo()
 
     async def aclose(self) -> None:

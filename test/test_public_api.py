@@ -20,6 +20,7 @@ def test_models_exports() -> None:
     assert sorted(gravitywell.models.__all__) == sorted(
         [
             "BaseResponse",
+            "BlockingResponse",
             "ComponentVersion",
             "Session",
             "SessionResponse",
