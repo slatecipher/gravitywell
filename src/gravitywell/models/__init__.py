@@ -17,6 +17,12 @@ from gravitywell.models._dns import BlockingResponse
 from gravitywell.models._info import ComponentVersion, LocalVersion, VersionResponse, Versions
 from gravitywell.models._stats import (
     ClientSummary,
+    DatabaseSummaryResponse,
+    DatabaseTopClient,
+    DatabaseTopClientsResponse,
+    DatabaseTopDomainsResponse,
+    DatabaseUpstream,
+    DatabaseUpstreamsResponse,
     GravitySummary,
     QuerySummary,
     QueryTypesResponse,
@@ -30,6 +36,7 @@ from gravitywell.models._stats import (
     UpstreamsResponse,
     UpstreamStatistics,
 )
+from gravitywell.models._time import TimeRange
 
 __all__ = [
     # gravitywell.models._auth
@@ -46,6 +53,12 @@ __all__ = [
     "Versions",
     # gravitywell.models._stats
     "ClientSummary",
+    "DatabaseSummaryResponse",
+    "DatabaseTopClient",
+    "DatabaseTopClientsResponse",
+    "DatabaseTopDomainsResponse",
+    "DatabaseUpstream",
+    "DatabaseUpstreamsResponse",
     "GravitySummary",
     "QuerySummary",
     "QueryTypesResponse",
@@ -58,4 +71,6 @@ __all__ = [
     "Upstream",
     "UpstreamStatistics",
     "UpstreamsResponse",
+    # gravitywell.models._time
+    "TimeRange",
 ]
