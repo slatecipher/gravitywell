@@ -14,6 +14,17 @@ Example:
 from gravitywell.models._auth import Session, SessionResponse
 from gravitywell.models._base import BaseResponse
 from gravitywell.models._dns import BlockingResponse
+from gravitywell.models._domains import (
+    ChangedDomainsResponse,
+    DomainRule,
+    DomainRuleKey,
+    DomainsResponse,
+    ProcessedItem,
+    ProcessedItems,
+    ProcessingError,
+    RuleKind,
+    RuleType,
+)
 from gravitywell.models._history import (
     ActivityResponse,
     ActivitySlot,
@@ -39,7 +50,6 @@ from gravitywell.models._queries import (
     ReplyType,
 )
 from gravitywell.models._search import (
-    DomainRule,
     ListMatch,
     ListMatchCounts,
     RuleMatchCounts,
@@ -78,6 +88,16 @@ __all__ = [
     "BaseResponse",
     # gravitywell.models._dns
     "BlockingResponse",
+    # gravitywell.models._domains
+    "ChangedDomainsResponse",
+    "DomainRule",
+    "DomainRuleKey",
+    "DomainsResponse",
+    "ProcessedItem",
+    "ProcessedItems",
+    "ProcessingError",
+    "RuleKind",
+    "RuleType",
     # gravitywell.models._history
     "ActivityResponse",
     "ActivitySlot",
@@ -105,7 +125,6 @@ __all__ = [
     "QuerySuggestionsResponse",
     "ReplyType",
     # gravitywell.models._search
-    "DomainRule",
     "ListMatch",
     "ListMatchCounts",
     "RuleMatchCounts",
