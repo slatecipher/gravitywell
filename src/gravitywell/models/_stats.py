@@ -13,6 +13,15 @@ def _zero_is_none(value: object) -> object:
     return None if value == 0 else value
 
 
+def _minus_one_is_none(value: object) -> object:
+    # Pi-hole sends a total of -1 when its privacy level hides the list.
+    return None if value == -1 else value
+
+
+# A plain alias, not a `type` statement, so JSON schemas write it in place.
+_HiddenTotal = Annotated[int | None, BeforeValidator(_minus_one_is_none)]
+
+
 class QuerySummary(BaseModel):
     """DNS queries in the Pi-hole's history, the last 24 hours by default."""
 
@@ -65,3 +74,46 @@ class SummaryResponse(BaseResponse):
     queries: QuerySummary
     clients: ClientSummary
     gravity: GravitySummary
+
+
+class TopDomain(BaseModel):
+    """A domain, and how many queries asked for it."""
+
+    domain: str = Field(description="The domain, such as `pi-hole.net`.")
+    count: int = Field(description="Queries for it, of the kind asked for: permitted or blocked.")
+
+
+class TopDomainsResponse(BaseResponse):
+    """The domains queried most, permitted or blocked, most queries first."""
+
+    domains: list[TopDomain] = Field(
+        description="Up to `count` domains, most queries first. Empty if the Pi-hole's privacy level hides domains."
+    )
+    total_queries: _HiddenTotal = Field(
+        description="All queries in the Pi-hole's history, or `null` if its privacy level hides domains."
+    )
+    blocked_queries: _HiddenTotal = Field(
+        description="Blocked queries in the Pi-hole's history, or `null` if its privacy level hides domains."
+    )
+
+
+class TopClient(BaseModel):
+    """A device that queries the Pi-hole, and how many queries it sent."""
+
+    ip: str = Field(description="Its IP address, IPv4 or IPv6, such as `192.168.0.44`.")
+    name: str = Field(description="Its hostname, such as `laptop.lan`, or an empty string if the Pi-hole knows none.")
+    count: int = Field(description="Its queries, of the kind asked for: all of them, or only the blocked ones.")
+
+
+class TopClientsResponse(BaseResponse):
+    """The clients that sent the most queries, most queries first."""
+
+    clients: list[TopClient] = Field(
+        description="Up to `count` clients, most queries first. Empty if the Pi-hole's privacy level hides clients."
+    )
+    total_queries: _HiddenTotal = Field(
+        description="All queries in the Pi-hole's history, or `null` if its privacy level hides clients."
+    )
+    blocked_queries: _HiddenTotal = Field(
+        description="Blocked queries in the Pi-hole's history, or `null` if its privacy level hides clients."
+    )
