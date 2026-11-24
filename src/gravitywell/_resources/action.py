@@ -51,7 +51,7 @@ class Action(Resource, prefix="/action", tags=["action"]):
         """
         ...
 
-    @method.post("/restartdns", tool_options=ToolOptions(idempotent=True))
+    @method.post("/restartdns", tool_options=ToolOptions(destructive=True, idempotent=True))
     def restart_dns(self) -> None:
         """Restart FTL, the Pi-hole's DNS server, web server and API.
 
@@ -112,7 +112,7 @@ class AsyncAction(AsyncResource, prefix="/action", tags=["action"]):
         """
         ...
 
-    @method.post("/restartdns", tool_options=ToolOptions(idempotent=True))
+    @method.post("/restartdns", tool_options=ToolOptions(destructive=True, idempotent=True))
     async def restart_dns(self) -> None:
         """Restart FTL, the Pi-hole's DNS server, web server and API.
 

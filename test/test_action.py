@@ -92,15 +92,17 @@ async def test_each_async_action_posts(name: str, serve: Serve, sent: list[httpx
     assert request.method == "POST"
 
 
-def test_ai_tools_mark_the_gravity_update_and_the_flushes_destructive() -> None:
+def test_ai_tools_mark_every_action_destructive() -> None:
+    # MCP's destructiveHint: false means "only additive updates", which none of
+    # these is: a restart stops DNS and the API for a moment.
     tools = {tool.name: tool for tool in list_tools(PiHole(BASE_URL, auth=PiHoleAuth(PASSWORD)))}
 
     def hints(name: str) -> tuple[bool, bool, bool]:
         return (tools[name].read_only, tools[name].destructive, tools[name].idempotent)
 
-    assert hints("action_restart_dns") == (False, False, True)
     assert (
-        hints("action_update_gravity")
+        hints("action_restart_dns")
+        == hints("action_update_gravity")
         == hints("action_flush_logs")
         == hints("action_flush_network")
         == (

@@ -55,7 +55,8 @@ async def test_allowing_writes_adds_those_that_destroy_nothing_and_allowing_dest
 
     assert set(writes) == tool_names(destructive=False)
     assert set(every) == tool_names()
-    assert {"config_add_dns_record", "domains_add"} <= set(writes) and "domains_delete" not in writes
+    assert {"config_add_dns_record", "domains_add"} <= set(writes)
+    assert {"domains_delete", "action_restart_dns"}.isdisjoint(writes)
 
 
 @pytest.mark.anyio
