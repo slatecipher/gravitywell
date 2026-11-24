@@ -13,6 +13,14 @@ Example:
 
 from gravitywell.models._auth import Session, SessionResponse
 from gravitywell.models._base import BaseResponse, ProcessedItem, ProcessedItems, ProcessingError
+from gravitywell.models._clients import (
+    ChangedClientsResponse,
+    ClientKey,
+    ClientsResponse,
+    ClientSuggestion,
+    ClientSuggestionsResponse,
+    ConfiguredClient,
+)
 from gravitywell.models._dns import BlockingResponse
 from gravitywell.models._domains import (
     ChangedDomainsResponse,
@@ -90,6 +98,13 @@ __all__ = [
     "ProcessingError",
     # gravitywell.models._dns
     "BlockingResponse",
+    # gravitywell.models._clients
+    "ChangedClientsResponse",
+    "ClientKey",
+    "ClientSuggestion",
+    "ClientSuggestionsResponse",
+    "ClientsResponse",
+    "ConfiguredClient",
     # gravitywell.models._domains
     "ChangedDomainsResponse",
     "DomainRule",
