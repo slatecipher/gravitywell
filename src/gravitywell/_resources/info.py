@@ -1,11 +1,17 @@
 """The information endpoints, under `/info`."""
 
-from clientx import AsyncResource, Resource, method
+from typing import Annotated
+
+from clientx import AsyncResource, Resource, Response, method
+from clientx.tools import tool
+from pydantic import Field
 
 from gravitywell.models import (
     DatabaseInfoResponse,
     FtlInfoResponse,
     HostInfoResponse,
+    MessageCountResponse,
+    MessagesResponse,
     MetricsResponse,
     SensorsResponse,
     SystemInfoResponse,
@@ -15,6 +21,45 @@ from gravitywell.models import (
 
 class Info(Resource, prefix="/info"):
     """Information about the Pi-hole: its versions, machine and DNS server."""
+
+    @method.get("/messages")
+    def messages(self) -> MessagesResponse:
+        """Fetch the problems the Pi-hole reports on its diagnosis page.
+
+        Use it first when something seems wrong: messages report invalid
+        regex rules, lists that failed to download, unreachable upstream
+        servers, rate-limited clients, a disk or memory running out, and
+        more. Fixing the cause doesn't remove a message: delete it once it's
+        dealt with. It changes nothing.
+        """
+        ...
+
+    @method.get("/messages/count")
+    def message_count(self) -> MessageCountResponse:
+        """Fetch how many problems the Pi-hole reports.
+
+        A quick check before fetching the messages themselves. It changes
+        nothing.
+        """
+        ...
+
+    # The raw request for `delete_messages` below, which joins the IDs into
+    # one path segment. `-> Response` keeps it out of AI tools.
+    @method.delete("/messages/{ids}")
+    def _delete_messages(self, ids: str) -> Response: ...
+
+    @tool(destructive=True, idempotent=True)
+    def delete_messages(self, ids: Annotated[list[int], Field(min_length=1)]) -> None:
+        """Delete diagnosis messages, such as ones whose problem is fixed.
+
+        It only removes the messages: a problem that persists is reported
+        again. If none of the messages exists, it answers with an error (404);
+        otherwise missing ones are skipped.
+
+        Args:
+            ids: The messages' IDs, as `messages` shows them, such as `[3, 4]`.
+        """
+        self._delete_messages(",".join(str(message_id) for message_id in ids))
 
     @method.get("/system")
     def system(self) -> SystemInfoResponse:
@@ -91,6 +136,45 @@ class Info(Resource, prefix="/info"):
 
 class AsyncInfo(AsyncResource, prefix="/info"):
     """Information about the Pi-hole: its versions, machine and DNS server."""
+
+    @method.get("/messages")
+    async def messages(self) -> MessagesResponse:
+        """Fetch the problems the Pi-hole reports on its diagnosis page.
+
+        Use it first when something seems wrong: messages report invalid
+        regex rules, lists that failed to download, unreachable upstream
+        servers, rate-limited clients, a disk or memory running out, and
+        more. Fixing the cause doesn't remove a message: delete it once it's
+        dealt with. It changes nothing.
+        """
+        ...
+
+    @method.get("/messages/count")
+    async def message_count(self) -> MessageCountResponse:
+        """Fetch how many problems the Pi-hole reports.
+
+        A quick check before fetching the messages themselves. It changes
+        nothing.
+        """
+        ...
+
+    # The raw request for `delete_messages` below, which joins the IDs into
+    # one path segment. `-> Response` keeps it out of AI tools.
+    @method.delete("/messages/{ids}")
+    async def _delete_messages(self, ids: str) -> Response: ...
+
+    @tool(destructive=True, idempotent=True)
+    async def delete_messages(self, ids: Annotated[list[int], Field(min_length=1)]) -> None:
+        """Delete diagnosis messages, such as ones whose problem is fixed.
+
+        It only removes the messages: a problem that persists is reported
+        again. If none of the messages exists, it answers with an error (404);
+        otherwise missing ones are skipped.
+
+        Args:
+            ids: The messages' IDs, as `messages` shows them, such as `[3, 4]`.
+        """
+        await self._delete_messages(",".join(str(message_id) for message_id in ids))
 
     @method.get("/system")
     async def system(self) -> SystemInfoResponse:
