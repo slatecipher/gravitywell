@@ -31,6 +31,7 @@ class FakePiHole:
 
     def __init__(self, *, has_password: bool = True) -> None:
         self.has_password = has_password
+        self.password = PASSWORD
         self.sent: list[httpx2.Request] = []
         # Recorded on arrival: a request sent again after a 401 is the same
         # object, with a new session header.
@@ -44,7 +45,7 @@ class FakePiHole:
         if (request.method, request.url.path) == ("POST", "/api/auth"):
             if not self.has_password:
                 return httpx2.Response(200, json=session_body(None))
-            if json.loads(request.content) != {"password": PASSWORD}:
+            if json.loads(request.content) != {"password": self.password}:
                 return httpx2.Response(401, json=session_body(None, valid=False))
             self.logins += 1
             sid = f"sid-{self.logins}"
@@ -131,6 +132,20 @@ def test_a_failed_login_raises_with_the_login_response() -> None:
     assert raised.value.response.request.url.path == "/api/auth"
     assert raised.value.response.json()["session"]["valid"] is False
     assert fake.calls() == [LOGIN]
+
+
+def test_a_password_function_is_called_at_each_login() -> None:
+    fake = FakePiHole()
+    secret = [PASSWORD]
+    api = PiHole(BASE_URL, auth=PiHoleAuth(lambda: secret[0]), transport=httpx2.MockTransport(fake))
+    api.info.version()
+    # The password changes, and the session expires.
+    fake.password = secret[0] = "new-app-password"
+    fake.live.clear()
+
+    api.info.version()
+
+    assert fake.calls() == [LOGIN, version("sid-1"), version("sid-1"), LOGIN, version("sid-2")]
 
 
 def test_a_pi_hole_without_a_password_gets_no_session_header() -> None:

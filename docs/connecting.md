@@ -36,6 +36,31 @@ Read the password from the environment or a secret store, never from your code:
 export PIHOLE_PASSWORD='...'   # or a .env file your app loads
 ```
 
+To read the password at each login instead, pass a function that returns it. A client logs in before its first request and again after a `401`, so a new password in a secret file, such as a Kubernetes secret that's updated in place, takes effect at the next login, with no restart:
+
+<!-- docs_src/connecting/password_file.py -->
+```python
+import os
+from pathlib import Path
+
+from gravitywell import PiHole, PiHoleAuth
+
+# The path of a file that holds the password, such as a Docker or Kubernetes secret.
+password_file = Path(os.environ["PIHOLE_PASSWORD_FILE"])
+
+
+def read_password() -> str:
+    # `echo password > file` ends the file with a newline, which isn't part of the password.
+    return password_file.read_text().strip()
+
+
+# PiHoleAuth calls read_password() at each login: before the first request, and after a 401.
+with PiHole("http://pi.hole", auth=PiHoleAuth(read_password)) as api:
+    print(api.dns.blocking().blocking)
+```
+
+`AsyncPiHole` calls the function in its event loop, so keep it quick: reading a file is, but a password manager's command can take a second.
+
 A Pi-hole without a password still takes a login, so pass an empty one: `PiHoleAuth("")`.
 
 ## Sessions

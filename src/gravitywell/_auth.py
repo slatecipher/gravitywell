@@ -1,7 +1,7 @@
 """Session authentication for a Pi-hole."""
 
 import threading
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator, Callable, Generator
 from contextlib import suppress
 from dataclasses import dataclass
 
@@ -14,6 +14,8 @@ _SID_HEADER = "X-FTL-SID"
 # A request is sent once, and once more after a 401 with a new login.
 _ATTEMPTS = 2
 _AUTH_PATH = "/api/auth"
+
+type PasswordProvider = Callable[[], str]
 
 
 @dataclass(frozen=True)
@@ -39,10 +41,13 @@ class PiHoleAuth(httpx2.Auth):
     the login's response. The clients log out when they close.
 
     Use an application password, which Pi-hole's settings create. Two-factor
-    authentication isn't supported.
+    authentication isn't supported. To read the password at each login, such
+    as from a secret file that's replaced when it changes, pass a function
+    that returns it: `PiHoleAuth(lambda: path.read_text().strip())`. Async
+    clients call it in the event loop, so it should be quick.
     """
 
-    def __init__(self, password: str) -> None:
+    def __init__(self, password: str | PasswordProvider) -> None:
         self._password = password
         # None until logged in. A session whose sid is None means the Pi-hole
         # has no password, so no header is sent.
@@ -111,7 +116,8 @@ class PiHoleAuth(httpx2.Auth):
         user_agent = request.headers.get("User-Agent")
         headers = {"User-Agent": user_agent} if user_agent is not None else None
         login_url = request.url.copy_with(path=_AUTH_PATH)
-        return httpx2.Request("POST", login_url, json={"password": self._password}, headers=headers)
+        password = self._password if isinstance(self._password, str) else self._password()
+        return httpx2.Request("POST", login_url, json={"password": password}, headers=headers)
 
 
 def _login_from(response: httpx2.Response) -> _Login:
