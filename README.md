@@ -21,7 +21,7 @@
 
 What you click through in [Pi-hole](https://pi-hole.net)'s web interface, your Python code can now do in a line: pause blocking, add a rule, search the query log, or check the Pi-hole's health. Every method is typed, so your editor autocompletes it, and the client logs in and out for you.
 
-Your AI assistant can do it too. The same methods are tools written for a model, and `gravitywell-mcp` serves them to Claude and other MCP apps, read-only unless you allow more.
+Your AI assistant can do it too. The same methods are tools written for a model, and `gravitywell-mcp` serves them to Claude and other MCP clients, read-only unless you allow more.
 
 ## Install
 
@@ -84,7 +84,7 @@ claude mcp add --scope user pihole -- \
   uvx --from "gravitywell[mcp]" gravitywell-mcp --env-file ~/.config/gravitywell/pihole.env
 ```
 
-Ask "is my Pi-hole healthy?", "why is this site blocked?" or "which device keeps asking for this domain?". It serves read-only tools until you add `--allow-writes` or `--allow-destructive`. [MCP server](https://github.com/slatecipher/gravitywell/blob/mainline/docs/mcp.md) covers Claude Desktop and other apps, and choosing which tools to serve.
+Ask "is my Pi-hole healthy?", "why is this site blocked?" or "which device keeps asking for this domain?". It serves read-only tools until you add `--allow-writes` or `--allow-destructive`. [MCP server](https://github.com/slatecipher/gravitywell/blob/mainline/docs/mcp.md) covers Claude Desktop and other MCP clients, and choosing which tools to serve.
 
 ## Features
 
@@ -93,7 +93,7 @@ Ask "is my Pi-hole healthy?", "why is this site blocked?" or "which device keeps
 - **Sessions handled.** One login per client, shared by concurrent requests, renewed once when it expires, sent in a header rather than the URL, and logged out on close.
 - **Sync and async.** `PiHole` and `AsyncPiHole` have the same methods, built on httpx2.
 - **AI tools.** Every endpoint is also a tool for a model, with descriptions written for one, JSON Schemas, safety hints, and errors it can act on. The insights tools answer common questions in one call: why a domain is blocked, who a device is, and what's wrong with the Pi-hole.
-- **An MCP server.** `gravitywell-mcp` serves the tools to Claude and other MCP apps, read-only by default, and only the areas you choose.
+- **An MCP server.** `gravitywell-mcp` serves the tools to Claude and other MCP clients, read-only by default, and only the areas you choose.
 - **Guard rails.** It won't delete the Default group, change settings that could lock you out, hand a model the session or the password hashes, or let a misspelled setting slip past silently, as Pi-hole would.
 
 ## Guide

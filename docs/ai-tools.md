@@ -2,7 +2,7 @@
 
 gravitywell is written for AI models as much as for people. Each of its endpoints is also a tool a model can call, through [ClientX](https://github.com/slatecipher/ClientX/blob/mainline/docs/tools.md): `list_tools(api)` returns one per endpoint, with a description written for a model, JSON Schemas of its arguments and result, hints that say whether it changes anything, and errors a model can act on.
 
-[`gravitywell-mcp`](mcp.md) serves these tools to Claude and other MCP apps, ready-made. This page is for using them in an agent of your own.
+[`gravitywell-mcp`](mcp.md) serves these tools to Claude and other MCP clients, ready-made. This page is for using them in an agent of your own.
 
 ## Listing the tools
 

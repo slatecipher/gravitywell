@@ -1,6 +1,6 @@
 # MCP server
 
-`gravitywell-mcp` serves gravitywell's [AI tools](ai-tools.md) over the [Model Context Protocol](https://modelcontextprotocol.io), so Claude Code, Claude Desktop and other MCP apps can check on and manage a Pi-hole. Ask "why is this site blocked?", "which device is making all these queries?" or "is my Pi-hole healthy?", and the model calls the tools that answer it.
+`gravitywell-mcp` serves gravitywell's [AI tools](ai-tools.md) over the [Model Context Protocol](https://modelcontextprotocol.io), so Claude Code, Claude Desktop and other MCP clients can check on and manage a Pi-hole. Ask "why is this site blocked?", "which device is making all these queries?" or "is my Pi-hole healthy?", and the model calls the tools that answer it.
 
 It serves read-only tools unless you allow more, and only the API areas you choose.
 
@@ -60,7 +60,7 @@ claude mcp add --scope user pihole -- \
 }
 ```
 
-**Other MCP apps:** have the app run `gravitywell-mcp` with the same arguments: it speaks MCP over stdio, the default. Or serve it [over HTTP](#http-transport).
+**Other MCP clients:** have them run `gravitywell-mcp` with the same arguments: it speaks MCP over stdio, the default. Or serve it [over HTTP](#http-transport).
 
 Restart the app, or reconnect the server, after changing its options: the tools are chosen when it starts.
 
@@ -72,7 +72,7 @@ Restart the app, or reconnect the server, after changing its options: the tools 
 | `--allow-writes` | Also the tools that only add, and delete or overwrite nothing: `domains_add`, `lists_add`, `groups_add`, `clients_add`, `config_add_dns_record`, `config_add_cname_record`, `config_add_reverse_server` and `config_add_static_lease`. |
 | `--allow-destructive` | Every tool, including those that delete, update, overwrite, flush or restart, such as `domains_delete`, `dns_set_blocking`, `config_update` and `action_restart_dns`. |
 
-Start read-only, and allow more when you need it. Most MCP apps also ask you before they run a tool. With an application password, the Pi-hole's [`app_sudo`](connecting.md#settings-that-need-app_sudo) setting is a second guard: with it off, no tool can change settings or sessions.
+Start read-only, and allow more when you need it. Most MCP clients also ask you before they run a tool. With an application password, the Pi-hole's [`app_sudo`](connecting.md#settings-that-need-app_sudo) setting is a second guard: with it off, no tool can change settings or sessions.
 
 ## Areas
 

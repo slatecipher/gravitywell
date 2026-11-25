@@ -16,7 +16,7 @@ One page per topic. Start with the [README](../README.md) for an overview, insta
 ## AI
 
 - [AI tools](ai-tools.md): gravitywell's endpoints as tools a model can call, their safety hints, the insights tools, and what stays out of a model's reach.
-- [MCP server](mcp.md): `gravitywell-mcp`, for Claude Code, Claude Desktop and other MCP apps: setup, access levels and areas.
+- [MCP server](mcp.md): `gravitywell-mcp`, for Claude Code, Claude Desktop and other MCP clients: setup, access levels and areas.
 
 ## Reference
 
