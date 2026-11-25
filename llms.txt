@@ -1,0 +1,89 @@
+# gravitywell
+
+> gravitywell is a third-party, typed Python client for the Pi-hole v6 REST API, on Python 3.12+, built on ClientX, httpx2 and Pydantic v2. `PiHole` (sync) and `AsyncPiHole` (async) group the API's endpoints by area (`api.dns`, `api.domains`, `api.stats`...), and each method returns a Pydantic model of the Pi-hole's whole answer. The same methods are AI tools, and `gravitywell-mcp` serves them over MCP.
+
+Install with `pip install gravitywell`, or `pip install "gravitywell[mcp]"` for the MCP server. gravitywell depends on `httpx2`, which is a different package from `httpx`: import `httpx2`, not `httpx`.
+
+**Rules for code that uses gravitywell** (each is explained in a bullet below):
+
+1. Import the clients and the auth from `gravitywell` (`PiHole`, `AsyncPiHole`, `PiHoleAuth`), and models only from `gravitywell.models`.
+2. Pass the Pi-hole's URL, such as `http://pi.hole`: the client sets the path to `/api` itself.
+3. Always pass `auth=PiHoleAuth(password)`, with an application password read from the environment or a secret store. Never write a password into code.
+4. Create one client per app or script, reuse it, and close it (`with`, `close()`, or `await aclose()`): a Pi-hole allows only a few sessions, and closing logs out. Never create a client per request.
+5. Read a result's fields: methods return the whole body as a model, such as `api.dns.blocking().blocking` and `api.domains.list().domains`, never a bare list.
+6. Pass `datetime`s with a timezone in a `TimeRange`: a naive one raises `pydantic.ValidationError`.
+7. `update()` and `move()` replace an item's settings: pass its `comment` again to keep it.
+8. Expect `403` from settings changes, sessions and Teleporter with an application password, unless the Pi-hole's `webserver.api.app_sudo` setting is on.
+9. Use `api.explain_domain()`, `api.explain_client()` and `api.check_health()` rather than combining endpoints yourself.
+10. In tests, pass `transport=httpx2.MockTransport(handler)`, and answer the login and logout at `/api/auth` with `{"session": {"sid": "test"}, "took": 0}`.
+
+A complete script:
+
+<!-- docs_src/llms/client.py -->
+```python
+import os
+from datetime import UTC, datetime, timedelta
+
+import httpx2
+from gravitywell import PiHole, PiHoleAuth
+from gravitywell.models import TimeRange
+
+# One client, with an application password from the environment.
+# Leaving the `with` block logs out.
+with PiHole("http://pi.hole", auth=PiHoleAuth(os.environ["PIHOLE_PASSWORD"])) as api:
+    # Each method returns a model of the whole response body: read its fields.
+    print(api.dns.blocking().blocking)  # "enabled", "disabled", "failure" or "unknown"
+    for domain in api.stats.top_domains(blocked=True, count=5).domains:
+        print(domain.domain, domain.count)
+
+    # The query database, over a time range whose datetimes have a timezone.
+    last_week = TimeRange(start=datetime.now(UTC) - timedelta(days=7))
+    print(api.stats.database.summary(last_week).sum_queries)
+
+    # A change, then what decides the domain now, in one call.
+    added = api.domains.add("deny", "exact", "ads.example.com", comment="Banner ads")
+    if added.processed and added.processed.errors:
+        print(added.processed.errors[0].error)
+    print(api.explain_domain("ads.example.com").rules)
+
+    # A 4xx or 5xx raises httpx2.HTTPStatusError, with the Pi-hole's reason in the body.
+    try:
+        api.config.add_dns_record("192.168.1.10", "nas.lan")
+    except httpx2.HTTPStatusError as error:
+        print(error.response.status_code, error.response.json()["error"]["message"])
+```
+
+- Clients: `PiHole(base_url, *, auth, verify=True, transport=None)`, an `httpx2.Client`, and `AsyncPiHole` with the same arguments, an `httpx2.AsyncClient`, whose methods are `async def` with the same names. `verify` takes an `ssl.SSLContext` that trusts the Pi-hole's certificate authority (`/etc/pihole/tls_ca.crt` on the Pi-hole) or `False`. A Teleporter export streams: `for chunk in api.teleporter.export()`, or `async for chunk in await api.teleporter.export()`.
+- Sessions: `PiHoleAuth` logs in on the first request (`POST /api/auth`), sends the session in the `X-FTL-SID` header, shares one login between concurrent requests, logs in again once after a 401, and logs out when the client closes. Two-factor authentication isn't supported: use an application password, created in the web interface under Settings › Web interface / API. A Pi-hole without a password takes `PiHoleAuth("")`.
+- Areas and methods (all on `api`): `dns.blocking()`, `dns.set_blocking(blocking, timer=None)`; `domains.list/get/add/update/move/delete`, `domains.batch.delete(rules)` (type `allow`/`deny`, kind `exact`/`regex`); `lists.list/get/add/update/delete`, `lists.batch.delete` (type `block`/`allow`); `groups.list/get/add/update/rename/delete`, `groups.batch.delete`; `clients.list/get/add/update/delete/suggestions`, `clients.batch.delete`; `search.lists(domain)`; `stats.summary/top_domains/top_clients/upstreams/query_types/recent_blocked`, `stats.database.summary/top_domains/top_clients/upstreams/query_types(time_range)`; `history.activity/clients`, `history.database.activity/clients(time_range)`; `queries.log(...)`, `queries.suggestions()`; `config.dns_records/add_dns_record/delete_dns_record`, `cname_records/add_cname_record/delete_cname_record`, `upstreams/set_upstreams`, `reverse_servers/add_reverse_server/delete_reverse_server`, `static_leases/add_static_lease/delete_static_lease`, `settings(key)`, `update(changes)`; `dhcp.leases/delete_lease`; `network.devices/delete_device/gateway/interfaces/routes`; `info.version/system/host/sensors/ftl/database/metrics/messages/message_count/delete_messages`; `padd.summary(full=False)`; `logs.dnsmasq/ftl/webserver(next_id=None, lines=None)`; `action.update_gravity/restart_dns/flush_logs/flush_network`; `sessions.list/delete`; `teleporter.export/restore`; and on the client, `explain_domain(domain)`, `explain_client(address)` and `check_health()`.
+- Adding: `domains.add`, `lists.add`, `groups.add` and `clients.add` take one item or a list; the Pi-hole saves each it can, and the result's `processed.success` and `processed.errors` say which. The Default group is ID `0`; `groups.delete` refuses to delete it with `clientx.ArgumentError`.
+- Settings: `config.settings(key)` reads a topic or a dotted key with Pi-hole's description of each; `config.update({"dotted.key": value})` changes several, all or none. Both cover only the `dns`, `dhcp`, `ntp`, `resolver`, `database` and `debug` topics, `misc.privacylevel` and `webserver.api.excludeClients`, `excludeDomains` and `maxHistory`; other keys raise `ArgumentError`. Local DNS and CNAME records, upstreams, reverse servers and static leases have their own methods. CNAME, upstream, reverse server and static lease changes restart FTL, pausing DNS for a second or two.
+- The query log: `queries.log()` filters by `time_range`, `domain`, `client_ip`, `client_name`, `upstream` (exact, or with `*` wildcards; `upstream="blocklist"` for every blocked query), `query_type`, `status`, `reply` and `dnssec`; `disk=True` reads the query database (91 days by default) rather than the last 24 hours in memory; page with `count` (at most 10,000), `start` and the first page's `cursor`.
+- Times: results' times are `datetime`s in UTC. `TimeRange(start=..., until=now)` goes to Pi-hole as Unix seconds.
+- Errors: `httpx2.HTTPStatusError` for a 4xx or 5xx (the Pi-hole's reason is `error.response.json()["error"]["message"]`), `httpx2.RequestError` for connection errors and timeouts, `clientx.ArgumentError` (a `ValueError`, with `.parameter`) when gravitywell refuses a call before changing anything, `pydantic.ValidationError` for an invalid argument model or an answer that doesn't fit its model.
+- AI tools: `from clientx.tools import list_tools`; `list_tools(api)` returns one `Tool` per method, named `<area>_<method>` (`stats_summary`, `stats_database_summary`) or `explain_domain`, `explain_client` and `check_health`, with `description`, `input_schema`, `output_schema`, `tags` (the area first, or `insights`), `call(arguments)` (`await acall(arguments)` on `AsyncPiHole`), and the hints `read_only`, `destructive` (deletes, overwrites, restarts or flushes; `False` means it only adds) and `idempotent`. A failed call raises `clientx.tools.ToolError`, whose message is for the model and never holds the session. Teleporter export and restore aren't tools.
+- MCP server: `gravitywell-mcp` reads `PIHOLE_URL`, `PIHOLE_PASSWORD` and `PIHOLE_VERIFY` from the environment or `--env-file`; serves read-only tools by default, `--allow-writes` adds the tools that only add, `--allow-destructive` adds every tool; `--areas stats,queries,insights` keeps only those areas; `--transport stdio` (default) or `http` (`--host 127.0.0.1 --port 8000`, at `/mcp`, with no authentication). `gravitywell.mcp.create_server(api: AsyncPiHole, *, areas=None, allow_writes=False, allow_destructive=False)` returns the FastMCP server.
+- Pi-hole versions: gravitywell supports Pi-hole v6 only. It was modeled on and tested against Pi-hole core v6.6, web v6.6.1 and FTL v6.9, which `gravitywell.PIHOLE_VERSIONS` records as `{"core": "v6.6", "web": "v6.6.1", "ftl": "v6.9"}`. It doesn't wrap `GET /api/auth`, `GET /api/info/client`, `GET /api/info/login`, `/api/auth/app`, `/api/auth/totp`, `/api/endpoints` or `/api/docs`.
+
+## Docs
+
+- [README](https://github.com/slatecipher/gravitywell/blob/mainline/README.md): overview, install, a quickstart, and the MCP server in Claude Code
+- [Connecting to a Pi-hole](https://github.com/slatecipher/gravitywell/blob/mainline/docs/connecting.md): the URL, application passwords, sessions, HTTPS certificates, and the endpoints that need app_sudo
+- [Async clients](https://github.com/slatecipher/gravitywell/blob/mainline/docs/async.md): AsyncPiHole, concurrent requests, streaming
+- [Blocking and allowing](https://github.com/slatecipher/gravitywell/blob/mainline/docs/blocking.md): how Pi-hole decides, pausing blocking, domain rules, lists and gravity updates, groups and clients, explain_domain
+- [Settings](https://github.com/slatecipher/gravitywell/blob/mainline/docs/settings.md): local DNS and CNAME records, upstream servers, reverse servers, static leases, settings() and update(), what restarts FTL
+- [Statistics and the query log](https://github.com/slatecipher/gravitywell/blob/mainline/docs/statistics.md): totals, top lists, history, TimeRange, query log filters, paging and statuses
+- [Health and maintenance](https://github.com/slatecipher/gravitywell/blob/mainline/docs/maintenance.md): check_health, PADD, info, logs, actions, network and DHCP, sessions, Teleporter backups
+- [Errors](https://github.com/slatecipher/gravitywell/blob/mainline/docs/errors.md): what gravitywell raises, Pi-hole's statuses, the calls it refuses
+- [Testing](https://github.com/slatecipher/gravitywell/blob/mainline/docs/testing.md): MockTransport, answering the login, checking requests
+- [AI tools](https://github.com/slatecipher/gravitywell/blob/mainline/docs/ai-tools.md): list_tools, safety hints, insights tools, provider formats, what stays out of a model's reach
+- [MCP server](https://github.com/slatecipher/gravitywell/blob/mainline/docs/mcp.md): install, configuration, Claude Code and Claude Desktop, access levels, areas, options, HTTP transport, create_server
+- [API reference](https://github.com/slatecipher/gravitywell/blob/mainline/docs/reference.md): every method, its Pi-hole endpoint, return model and tool hint
+- [Pi-hole compatibility](https://github.com/slatecipher/gravitywell/blob/mainline/docs/compatibility.md): the release it's modeled on, newer releases, what it covers and leaves out
+- [CHANGELOG](https://github.com/slatecipher/gravitywell/blob/mainline/CHANGELOG.md): changes in each release; the API may change between minor versions before 1.0
+
+## Optional
+
+- [CONTRIBUTING](https://github.com/slatecipher/gravitywell/blob/mainline/CONTRIBUTING.md): development setup and commit conventions for contributing to gravitywell itself
+- [SECURITY](https://github.com/slatecipher/gravitywell/blob/mainline/SECURITY.md): how to report a vulnerability
+- [ClientX's llms.txt](https://github.com/slatecipher/ClientX/blob/mainline/llms.txt): the library gravitywell's clients and tools are built on

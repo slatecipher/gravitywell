@@ -31,6 +31,12 @@ dependencies = [
     "pydantic>=2.12.5",
 ]
 
+[project.urls]
+Repository = "https://github.com/slatecipher/gravitywell"
+Documentation = "https://github.com/slatecipher/gravitywell/tree/mainline/docs"
+Issues = "https://github.com/slatecipher/gravitywell/issues"
+Changelog = "https://github.com/slatecipher/gravitywell/blob/mainline/CHANGELOG.md"
+
 [project.optional-dependencies]
 # `gravitywell.mcp` and the `gravitywell-mcp` command: an MCP server for the
 # AI tools, on FastMCP.
@@ -62,10 +68,12 @@ addopts = ["--import-mode=importlib", "-vv", "--cov=gravitywell", "--cov-report=
 strict = true
 
 [tool.pyright]
-# Editors check both trees. `make typecheck` passes `src` on the command line
-# (which overrides this list), so CI gates only the shipped package.
-include = ["src", "test"]
+# Editors check every tree. `make typecheck` passes `src`, `docs_src` and
+# `scripts` on the command line (which overrides this list), so CI gates the
+# shipped package, the docs' samples and scripts.
+include = ["src", "test", "docs_src", "scripts"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
-# The shipped package is held to strict mode; tests stay on standard.
-strict = ["src"]
+# The shipped package, the docs' samples and scripts are held to strict mode;
+# tests stay on standard.
+strict = ["src", "docs_src", "scripts"]

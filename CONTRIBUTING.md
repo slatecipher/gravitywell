@@ -23,7 +23,8 @@ uv installs the package in editable mode, so your changes to `src/` take effect 
 Other useful commands:
 
 ```bash
-make lint                                           # format and auto-fix with ruff
+make lint                                           # format and auto-fix with ruff, then make docs
+make docs                                           # copy the samples in docs_src/ into the docs
 make typecheck                                      # pyright, strict on src/
 uv run pytest test/test_public_api.py::test_name    # run a single test
 ```
@@ -36,6 +37,7 @@ When you change code:
 - Never put a Pi-hole password in code, tests or docs. Read it from an environment variable, such as `PIHOLE_PASSWORD`.
 - Ruff formats and lints the code with a 120-character line limit, and checks that docstrings and comments wrap at 80 (W505). `make lint` fixes most issues for you, but not W505: rewrap those lines yourself.
 - Write docstrings by the rules in [Docstrings](#docstrings).
+- The docs' code samples are files in `docs_src/`, which `make lint` and `make typecheck` check and the tests run. Edit a sample there, then run `make docs` to copy it into the pages that show it: the tests fail while a page's copy is stale.
 
 ## Docstrings
 
@@ -65,7 +67,7 @@ Docstrings follow the [Google Python Style Guide](https://google.github.io/style
 
 - Keep each pull request to one change, on a branch named `<type>/<short-description>`, for example `feat/blocking`.
 - In the description, say what changed and why, and how you tested it. If the pull request resolves an issue, add `Closes #N`.
-- For changes users will notice, add an entry under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md), and update [README.md](README.md) if it describes the behavior.
+- For changes users will notice, add an entry under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md), and update [README.md](README.md), the guide in [docs/](docs/README.md) and [llms.txt](llms.txt) where they describe the behavior. A new endpoint goes in the [API reference](docs/reference.md).
 - CI must pass: lint, type check, tests on Python 3.12 to 3.14 and on the lowest supported dependency versions, and a build of the package.
 - Pull requests are squash-merged, so each one becomes a single commit on `mainline`. That commit's subject comes from the pull request title, or from the commit subject when there is only one commit. Use the format below for both.
 
