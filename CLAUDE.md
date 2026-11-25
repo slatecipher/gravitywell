@@ -15,6 +15,7 @@ make lint             # ruff format + ruff check --fix on src, test, docs_src an
 make typecheck        # pyright, strict on src, docs_src and scripts; gates CI
 make docs             # copy the samples in docs_src/ into the pages that show them
 make test-ci          # pytest with the 95% coverage gate CI uses (make test: without the gate)
+make release-pr       # maintainer: open the release PR and its draft release (CONTRIBUTING.md's Releasing)
 uv run pytest test/test_public_api.py::test_name --no-cov   # one test, without coverage
 ```
 
@@ -80,4 +81,4 @@ Read ClientX from its public repo, as an outside user would: its [`llms.txt`](ht
 
 ## Conventions
 
-@CONTRIBUTING.md is the source of truth for commit messages, branch names, pull request descriptions, labels and docstrings. Follow it for every commit and pull request, and its Docstrings section for every docstring you write or change. Keep this section, and the `@CONTRIBUTING.md` import in it, when rewriting this file.
+@CONTRIBUTING.md is the source of truth for commit messages, branch names, pull request descriptions, labels, docstrings and the release steps. Follow it for every commit and pull request, and its Docstrings section for every docstring you write or change. Keep this section, and the `@CONTRIBUTING.md` import in it, when rewriting this file.

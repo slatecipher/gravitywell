@@ -112,12 +112,19 @@ Dependabot's update pull requests get the `dependencies` label automatically.
 
 `.github/workflows/release.yml` publishes to PyPI with Trusted Publishing, so no API tokens are stored.
 
-1. From an up-to-date `mainline`, on a branch named `chore/release-X.Y.Z`, set the version with `uvx uv@latest version X.Y.Z --no-sync`. It relocks with the latest uv, so `uv.lock` keeps its format, and only one line changes in each of `pyproject.toml` and `uv.lock`. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`, add a new, empty `## [Unreleased]` above it, and update the links at the bottom. Open the pull request as `chore: Prepare the X.Y.Z release`.
-2. Create a draft GitHub release, `vX.Y.Z`, with the version's changelog section as its notes: `gh release create vX.Y.Z --draft --target mainline --title vX.Y.Z --notes-file notes.md`.
-3. Optional dry run: after merging, `gh workflow run release.yml` builds `mainline` and publishes it to TestPyPI only.
+1. On an up-to-date `mainline` with a clean working tree, run `make release-pr`. It needs the `gh` CLI, logged in. It works out the next version from `## [Unreleased]` in `CHANGELOG.md`, by the rules in [Versions](#versions), and renames that section to `## [X.Y.Z] - YYYY-MM-DD`. It sets `version` in `pyproject.toml` with the latest uv, which relocks, then commits on `chore/release-X.Y.Z`, pushes to the remote `mainline` tracks, and opens the release pull request. Last, it creates a draft GitHub release, `vX.Y.Z`, with the version's changelog section as its notes. To choose the version yourself, run `make release-pr VERSION=X.Y.Z`.
+2. Review the pull request and merge it. If you change the changelog in it, update the draft's notes: `uv run python scripts/release.py notes X.Y.Z | gh release edit vX.Y.Z --notes-file -`.
+3. Optional dry run: `gh workflow run release.yml` builds `mainline` and publishes it to TestPyPI only.
 4. Right after merging, publish the draft release, on GitHub or with `gh release edit vX.Y.Z --draft=false`. That tags `vX.Y.Z` on `mainline` and starts the Release workflow, which checks that the tag matches the project version, builds and smoke-tests the package, publishes it to TestPyPI, and waits for your approval on the `pypi` environment before it publishes to PyPI.
 
-Choose the version from everything under `## [Unreleased]`, by [Semantic Versioning](https://semver.org/). Before 1.0, a release with only fixes is a patch, such as 0.1.0 to 0.1.1, and one with a new feature or a breaking change is a minor version, such as 0.1.1 to 0.2.0.
+### Versions
+
+gravitywell follows [Semantic Versioning](https://semver.org/). Before 1.0:
+
+- A release with only fixes is a patch, such as 0.1.0 to 0.1.1.
+- A release with a new feature or a breaking change is a minor version, such as 0.1.1 to 0.2.0. Label breaking changes `breaking change` and call them out in the changelog.
+- Choose the version when releasing, from everything under `## [Unreleased]`, not in each pull request. `make release-pr` applies these rules: a patch if `[Unreleased]` has only `Fixed` or `Security` sections, and a minor version otherwise.
+- Documentation changes don't need a release: the guide in `docs/` is read on GitHub. PyPI shows the README from the last release, so a README change reaches PyPI with the next one. Release a patch for it only if the PyPI page is wrong in a way that can't wait.
 
 ## License
 
