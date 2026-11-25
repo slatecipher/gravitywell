@@ -28,6 +28,8 @@ classifiers = [
 dependencies = [
     "anyio>=4.10",
     "clientx>=0.6.0",
+    # Imported directly (`PiHoleAuth` is an `httpx2.Auth`), not only through ClientX.
+    "httpx2>=2.10.0",
     "pydantic>=2.12.5",
 ]
 

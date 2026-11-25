@@ -9,6 +9,8 @@ Thanks for your interest in gravitywell. It's a personal project maintained in s
 
 For anything bigger than a small fix, please open an issue to discuss it before you start on a pull request.
 
+To report a security vulnerability, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
+
 ## Development setup
 
 You need Python 3.12 or newer and [uv](https://docs.astral.sh/uv/). Fork the repository, clone your fork, and run:
@@ -25,13 +27,13 @@ Other useful commands:
 ```bash
 make lint                                           # format and auto-fix with ruff, then make docs
 make docs                                           # copy the samples in docs_src/ into the docs
-make typecheck                                      # pyright, strict on src/
+make typecheck                                      # pyright, strict on src/, docs_src/ and scripts/
 uv run pytest test/test_public_api.py::test_name    # run a single test
 ```
 
 When you change code:
 
-- New code in `src/` needs complete type annotations. Pyright checks `src/` in strict mode.
+- New code in `src/` needs complete type annotations. Pyright checks `src/`, `docs_src/` and `scripts/` in strict mode.
 - Add tests for new behavior and for bug fixes. `make test` prints a coverage report.
 - Tests never reach the network or a real Pi-hole: send requests through `httpx2.MockTransport`, as ClientX's [testing guide](https://github.com/slatecipher/ClientX/blob/mainline/docs/testing.md) shows. pytest runs in its recommended `importlib` import mode, where test modules can't import helper modules, so share test helpers as fixtures in `conftest.py`. It also runs in strict mode: an unregistered marker or a duplicate parametrize ID is an error.
 - Never put a Pi-hole password in code, tests or docs. Read it from an environment variable, such as `PIHOLE_PASSWORD`.

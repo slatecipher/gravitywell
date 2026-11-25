@@ -558,6 +558,7 @@ source = { editable = "." }
 dependencies = [
     { name = "anyio" },
     { name = "clientx" },
+    { name = "httpx2" },
     { name = "pydantic" },
 ]
 
@@ -585,6 +586,7 @@ requires-dist = [
     { name = "click", marker = "extra == 'mcp'", specifier = ">=8.1" },
     { name = "clientx", specifier = ">=0.6.0" },
     { name = "clientx", extras = ["fastmcp"], marker = "extra == 'mcp'", specifier = ">=0.6.0" },
+    { name = "httpx2", specifier = ">=2.10.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "python-dotenv", marker = "extra == 'mcp'", specifier = ">=1.1" },
 ]
