@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-25
+
 ### Fixed
 
 - Declare `httpx2` (`>=2.10.0`), which gravitywell imports directly, rather than relying on ClientX to install it.
@@ -41,5 +43,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `api.clients`, the clients the Pi-hole recognizes by IP address, subnet, MAC address, hostname or interface, and the groups they're in: `list()`, `get()`, `add()` (one or several, reporting which were saved), `update()`, `delete()`, `batch.delete()`, and `suggestions()` for devices seen but not configured yet (`/api/clients`).
 - `gravitywell.PIHOLE_VERSIONS`, the Pi-hole release gravitywell was modeled on and tested against: core v6.6, web v6.6.1 and FTL v6.9, keyed by component as `api.info.version()` names them.
 
-[Unreleased]: https://github.com/slatecipher/gravitywell/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/slatecipher/gravitywell/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/slatecipher/gravitywell/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/slatecipher/gravitywell/releases/tag/v0.1.0
