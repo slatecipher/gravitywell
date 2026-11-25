@@ -7,7 +7,7 @@
 </h1>
 
 <p align="center">
-  <em>A typed Python client for the Pi-hole v6 REST API, with AI tools and an MCP server.</em>
+  <em>A third-party, typed Python client for the Pi-hole v6 REST API, with AI tools and an MCP server.</em>
 </p>
 
 <p align="center">
