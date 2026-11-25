@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Declare `httpx2` (`>=2.10.0`), which gravitywell imports directly, rather than relying on ClientX to install it.
+
 ## [0.1.0] - 2026-11-25
 
 ### Added
