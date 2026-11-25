@@ -19,9 +19,11 @@
 
 ## Overview
 
-What you click through in [Pi-hole](https://pi-hole.net)'s web interface, your Python code can now do in a line: pause blocking, add a rule, search the query log, or check the Pi-hole's health. Every method is typed, so your editor autocompletes it, and the client logs in and out for you.
+gravitywell is a typed Python client for [Pi-hole](https://pi-hole.net)'s v6 REST API, in sync and async versions.
 
-Your AI assistant can do it too. The same methods are tools written for a model, and `gravitywell-mcp` serves them to Claude and other MCP clients, read-only unless you allow more.
+It handles the session for you, so you can get straight to work: pause blocking for five minutes, add an allow rule, or pull the last hour of blocked queries from one device. Answers come back as Pydantic models your editor can autocomplete.
+
+It's built for AI agents too. Its methods double as tools with descriptions written for a model, and the insights tools answer questions like "why is this domain blocked?" in a single call. `gravitywell-mcp` serves them to Claude and other MCP clients, read-only unless you allow more.
 
 ## Install
 
