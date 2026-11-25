@@ -66,6 +66,9 @@ def test_the_sample_runs(sample: Path, monkeypatch: pytest.MonkeyPatch, tmp_path
     monkeypatch.setenv("PIHOLE_PASSWORD", "docs-sample")
     monkeypatch.chdir(tmp_path)
     (tmp_path / "pihole-backup.zip").write_bytes(b"PK\x05\x06" + bytes(18))
+    # And a password file, which ends with a newline, as `echo` writes it.
+    (tmp_path / "pihole-password").write_text("docs-sample\n")
+    monkeypatch.setenv("PIHOLE_PASSWORD_FILE", str(tmp_path / "pihole-password"))
     monkeypatch.setattr(ssl.SSLContext, "load_verify_locations", lambda *_, **__: None)
     with contextlib.suppress(RequestSentError):
         namespace = runpy.run_path(str(sample), run_name="docs_sample")

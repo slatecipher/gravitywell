@@ -8,7 +8,7 @@ Every public name in gravitywell: the clients, the methods on each API area, the
 |---|---|
 | `gravitywell.PiHole(base_url, *, auth, verify=True, transport=None)` | The sync client, an `httpx2.Client`. `base_url` is the Pi-hole's URL, such as `http://pi.hole`: the client sets its path to `/api`. `verify` is an `ssl.SSLContext` that trusts the Pi-hole's certificate, or `False` to skip the check. See [Connecting to a Pi-hole](connecting.md). |
 | `gravitywell.AsyncPiHole(base_url, *, auth, verify=True, transport=None)` | The async client, an `httpx2.AsyncClient`, with the same areas and methods as `async def`. See [Async clients](async.md). |
-| `gravitywell.PiHoleAuth(password)` | Logs in with a password, preferably an application password, sends the session in the `X-FTL-SID` header, logs in again once after a 401, and logs out when the client closes. |
+| `gravitywell.PiHoleAuth(password)` | Logs in with a password, preferably an application password, or a function that returns it, called at each login, sends the session in the `X-FTL-SID` header, logs in again once after a 401, and logs out when the client closes. |
 | `gravitywell.PIHOLE_VERSIONS` | The Pi-hole release gravitywell was modeled on and tested against, by component: `{"core": "v6.6", "web": "v6.6.1", "ftl": "v6.9"}`. See [Pi-hole compatibility](compatibility.md). |
 | `gravitywell.__version__` | gravitywell's version, such as `0.1.0`. |
 | `gravitywell.models` | The Pydantic models of request and response bodies, such as `SummaryResponse` and `TimeRange`. Each endpoint returns a model of the whole response body, and each response model has `took`, the seconds the Pi-hole took. |
