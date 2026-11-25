@@ -14,10 +14,11 @@ Example:
 
 from gravitywell._auth import PiHoleAuth
 from gravitywell._client import AsyncPiHole, PiHole
-from gravitywell._version import __version__
+from gravitywell._version import PIHOLE_VERSIONS, __version__
 
 __all__ = [
     # gravitywell._version
+    "PIHOLE_VERSIONS",
     "__version__",
     # gravitywell._auth
     "PiHoleAuth",
