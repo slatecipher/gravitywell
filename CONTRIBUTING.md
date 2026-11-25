@@ -108,6 +108,17 @@ The maintainer applies the labels. Two more labels mark special cases:
 
 Dependabot's update pull requests get the `dependencies` label automatically.
 
+## Releasing (maintainer)
+
+`.github/workflows/release.yml` publishes to PyPI with Trusted Publishing, so no API tokens are stored.
+
+1. From an up-to-date `mainline`, on a branch named `chore/release-X.Y.Z`, set the version with `uvx uv@latest version X.Y.Z --no-sync`. It relocks with the latest uv, so `uv.lock` keeps its format, and only one line changes in each of `pyproject.toml` and `uv.lock`. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`, add a new, empty `## [Unreleased]` above it, and update the links at the bottom. Open the pull request as `chore: Prepare the X.Y.Z release`.
+2. Create a draft GitHub release, `vX.Y.Z`, with the version's changelog section as its notes: `gh release create vX.Y.Z --draft --target mainline --title vX.Y.Z --notes-file notes.md`.
+3. Optional dry run: after merging, `gh workflow run release.yml` builds `mainline` and publishes it to TestPyPI only.
+4. Right after merging, publish the draft release, on GitHub or with `gh release edit vX.Y.Z --draft=false`. That tags `vX.Y.Z` on `mainline` and starts the Release workflow, which checks that the tag matches the project version, builds and smoke-tests the package, publishes it to TestPyPI, and waits for your approval on the `pypi` environment before it publishes to PyPI.
+
+Choose the version from everything under `## [Unreleased]`, by [Semantic Versioning](https://semver.org/). Before 1.0, a release with only fixes is a patch, such as 0.1.0 to 0.1.1, and one with a new feature or a breaking change is a minor version, such as 0.1.1 to 0.2.0.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).
