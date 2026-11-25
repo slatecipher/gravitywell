@@ -13,6 +13,7 @@ uv sync --all-groups --reinstall-package gravitywell   # install; rerun after ch
 make check            # lint + typecheck + test
 make lint             # ruff format + ruff check --fix on src, test, docs_src and scripts, then make docs
 make typecheck        # pyright, strict on src, docs_src and scripts; gates CI
+make typecheck-tests  # pyright on test/, standard mode; advisory in CI
 make docs             # copy the samples in docs_src/ into the pages that show them
 make test-ci          # pytest with the 95% coverage gate CI uses (make test: without the gate)
 make release-pr       # maintainer: open the release PR and its draft release (CONTRIBUTING.md's Releasing)

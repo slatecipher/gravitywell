@@ -70,9 +70,10 @@ addopts = ["--import-mode=importlib", "-vv", "--cov=gravitywell", "--cov-report=
 strict = true
 
 [tool.pyright]
-# Editors check every tree. `make typecheck` passes `src`, `docs_src` and
-# `scripts` on the command line (which overrides this list), so CI gates the
-# shipped package, the docs' samples and scripts.
+# Editors check every tree. CI splits them: `make typecheck` passes `src`,
+# `docs_src` and `scripts` on the command line (which overrides this list) and
+# gates the build, while `make typecheck-tests` covers `test` as a non-blocking
+# report.
 include = ["src", "test", "docs_src", "scripts"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"

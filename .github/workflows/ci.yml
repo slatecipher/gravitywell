@@ -57,6 +57,12 @@ jobs:
       - name: Run pyright
         run: make typecheck
 
+      # Advisory only. Test-suite type errors are surfaced as a failed step
+      # annotation but must not gate a merge, so the job stays green.
+      - name: Run pyright over tests (non-blocking)
+        continue-on-error: true
+        run: make typecheck-tests
+
   test:
     runs-on: ubuntu-latest
     strategy:

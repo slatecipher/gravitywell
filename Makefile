@@ -1,4 +1,4 @@
-.PHONY: lint lint-ci typecheck test test-ci docs check release-pr
+.PHONY: lint lint-ci typecheck typecheck-tests test test-ci docs check release-pr
 
 # Formats and fixes, then copies the formatted samples into the docs.
 lint:
@@ -14,6 +14,10 @@ lint-ci:
 # so this stays scoped to the shipped package, the docs' samples and scripts.
 typecheck:
 	uv run pyright src docs_src scripts
+
+# Advisory: reported in CI via continue-on-error, never blocks a merge.
+typecheck-tests:
+	uv run pyright test
 
 test:
 	uv run pytest
