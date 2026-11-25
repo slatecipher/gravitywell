@@ -9,7 +9,7 @@ Install with `pip install gravitywell`, or `pip install "gravitywell[mcp]"` for 
 1. Import the clients and the auth from `gravitywell` (`PiHole`, `AsyncPiHole`, `PiHoleAuth`), and models only from `gravitywell.models`.
 2. Pass the Pi-hole's URL, such as `http://pi.hole`: the client sets the path to `/api` itself.
 3. Always pass `auth=PiHoleAuth(password)`, with an application password read from the environment or a secret store. Never write a password into code.
-4. Create one client per app or script, reuse it, and close it (`with`, `close()`, or `await aclose()`): a Pi-hole allows only a few sessions, and closing logs out. Never create a client per request.
+4. Create one client per Pi-hole in an app or script, reuse it, and close it (`with`, `close()`, or `await aclose()`): a Pi-hole allows only a few sessions, and closing logs out. Never create a client per request. For several Pi-holes, give each client its own `PiHoleAuth`: it holds one Pi-hole's session.
 5. Read a result's fields: methods return the whole body as a model, such as `api.dns.blocking().blocking` and `api.domains.list().domains`, never a bare list.
 6. Pass `datetime`s with a timezone in a `TimeRange`: a naive one raises `pydantic.ValidationError`.
 7. `update()` and `move()` replace an item's settings: pass its `comment` again to keep it.
@@ -68,7 +68,7 @@ with PiHole("http://pi.hole", auth=PiHoleAuth(os.environ["PIHOLE_PASSWORD"])) as
 ## Docs
 
 - [README](https://github.com/slatecipher/gravitywell/blob/mainline/README.md): overview, install, a quickstart, and the MCP server in Claude Code
-- [Connecting to a Pi-hole](https://github.com/slatecipher/gravitywell/blob/mainline/docs/connecting.md): the URL, application passwords, sessions, HTTPS certificates, and the endpoints that need app_sudo
+- [Connecting to a Pi-hole](https://github.com/slatecipher/gravitywell/blob/mainline/docs/connecting.md): the URL, application passwords, sessions, several Pi-holes, HTTPS certificates, and the endpoints that need app_sudo
 - [Async clients](https://github.com/slatecipher/gravitywell/blob/mainline/docs/async.md): AsyncPiHole, concurrent requests, streaming
 - [Blocking and allowing](https://github.com/slatecipher/gravitywell/blob/mainline/docs/blocking.md): how Pi-hole decides, pausing blocking, domain rules, lists and gravity updates, groups and clients, explain_domain
 - [Settings](https://github.com/slatecipher/gravitywell/blob/mainline/docs/settings.md): local DNS and CNAME records, upstream servers, reverse servers, static leases, settings() and update(), what restarts FTL

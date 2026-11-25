@@ -4,7 +4,7 @@ One page per topic. Start with the [README](../README.md) for an overview, insta
 
 ## Using gravitywell
 
-- [Connecting to a Pi-hole](connecting.md): the URL, application passwords, sessions, HTTPS certificates, and the endpoints that need `app_sudo`.
+- [Connecting to a Pi-hole](connecting.md): the URL, application passwords, sessions, several Pi-holes, HTTPS certificates, and the endpoints that need `app_sudo`.
 - [Async clients](async.md): `AsyncPiHole`, concurrent requests and streaming.
 - [Blocking and allowing](blocking.md): how Pi-hole decides, pausing blocking, domain rules, blocklists and allowlists, groups and clients, and why a domain is blocked.
 - [Settings](settings.md): local DNS and CNAME records, upstream servers, reverse servers, static DHCP leases, and other settings.
