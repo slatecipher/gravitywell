@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-25
+
 ### Added
 
 - `PiHole` and `AsyncPiHole`, clients for a Pi-hole's v6 REST API, with `api.info.version()` for the installed versions of the Pi-hole's components (`GET /api/info/version`). They take the Pi-hole's URL, such as `http://pi.hole`, a required `auth=`, and `verify=` and `transport=`. Each endpoint returns a model of its whole response body, from `gravitywell.models`, which extends `BaseResponse` and so has `took`, the seconds the Pi-hole took to process the request.
@@ -35,6 +37,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `api.clients`, the clients the Pi-hole recognizes by IP address, subnet, MAC address, hostname or interface, and the groups they're in: `list()`, `get()`, `add()` (one or several, reporting which were saved), `update()`, `delete()`, `batch.delete()`, and `suggestions()` for devices seen but not configured yet (`/api/clients`).
 - `gravitywell.PIHOLE_VERSIONS`, the Pi-hole release gravitywell was modeled on and tested against: core v6.6, web v6.6.1 and FTL v6.9, keyed by component as `api.info.version()` names them.
 
-### Changed
-
-- Require ClientX 0.6.
+[Unreleased]: https://github.com/slatecipher/gravitywell/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/slatecipher/gravitywell/releases/tag/v0.1.0
