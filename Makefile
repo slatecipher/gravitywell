@@ -1,4 +1,4 @@
-.PHONY: lint lint-ci typecheck test test-ci docs check
+.PHONY: lint lint-ci typecheck test test-ci docs check release-pr
 
 # Formats and fixes, then copies the formatted samples into the docs.
 lint:
@@ -28,3 +28,8 @@ docs:
 	uv run python scripts/sync_docs.py
 
 check: lint typecheck test
+
+# Opens the release pull request and its draft release, with the version the
+# changelog calls for, or VERSION=X.Y.Z. See "Releasing" in CONTRIBUTING.md.
+release-pr:
+	uv run python scripts/release.py pr $(if $(VERSION),--version $(VERSION))
