@@ -61,9 +61,10 @@ def test_the_sample_runs(sample: Path, monkeypatch: pytest.MonkeyPatch, tmp_path
 
     monkeypatch.setattr(httpx2.HTTPTransport, "handle_request", stop)
     monkeypatch.setattr(httpx2.AsyncHTTPTransport, "handle_async_request", astop)
-    # What the samples read: the password, a backup to restore, and the
+    # What the samples read: the passwords, a backup to restore, and the
     # Pi-hole's certificate authority, which isn't here to load.
-    monkeypatch.setenv("PIHOLE_PASSWORD", "docs-sample")
+    for variable in ("PIHOLE_PASSWORD", "PIHOLE_PRIMARY_PASSWORD", "PIHOLE_SECONDARY_PASSWORD"):
+        monkeypatch.setenv(variable, "docs-sample")
     monkeypatch.chdir(tmp_path)
     (tmp_path / "pihole-backup.zip").write_bytes(b"PK\x05\x06" + bytes(18))
     # And a password file, which ends with a newline, as `echo` writes it.

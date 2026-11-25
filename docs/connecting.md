@@ -95,6 +95,33 @@ print(blocked_today())
 
 To see the sessions logged in to a Pi-hole, and log out the ones apps left open, use [`api.sessions`](maintenance.md#sessions).
 
+## Several Pi-holes
+
+A client talks to one Pi-hole. For two, such as a primary and a replica, create a client for each, with its own `PiHoleAuth` and that Pi-hole's password. An auth holds the session of the Pi-hole it logged in to, so a shared one would send one Pi-hole's session, and then its password, to the other.
+
+<!-- docs_src/connecting/several.py -->
+```python
+import os
+
+from gravitywell import PiHole, PiHoleAuth
+
+# Each Pi-hole has its own application password, and each client its own PiHoleAuth.
+primary_auth = PiHoleAuth(os.environ["PIHOLE_PRIMARY_PASSWORD"])
+secondary_auth = PiHoleAuth(os.environ["PIHOLE_SECONDARY_PASSWORD"])
+
+with (
+    PiHole("http://192.168.1.2", auth=primary_auth) as primary,
+    PiHole("http://192.168.1.3", auth=secondary_auth) as secondary,
+):
+    # Devices send their queries to either Pi-hole, so pause blocking on both: a domain one lets
+    # through, the other would still block.
+    for api in (primary, secondary):
+        api.dns.set_blocking(False, timer=300)
+# Leaving the block logged out of both.
+```
+
+gravitywell doesn't keep Pi-holes in step: to change both, make the change through each client. `AsyncPiHole` clients can send their requests to every Pi-hole at once, with [`asyncio.gather()`](async.md#concurrent-requests). The [MCP server](mcp.md) serves one Pi-hole, so run one for each.
+
 ## HTTPS
 
 A Pi-hole serves its web interface and API over HTTPS too, with a certificate it creates and signs itself at install time. Python doesn't trust that certificate, so tell the client to, with `verify=`. Copy the Pi-hole's certificate authority, `/etc/pihole/tls_ca.crt`, from the Pi-hole, and pass an `ssl.SSLContext` that trusts it:
