@@ -76,7 +76,25 @@ Start read-only, and allow more when you need it. Most MCP clients also ask you 
 
 ## Areas
 
-`--areas` serves only the tools of the areas it names, comma-separated, such as `--areas insights,stats,queries`: fewer tools leave a model less to choose from. Every area by default.
+`--areas` serves only the tools of the areas it names, comma-separated, such as `--areas insights,stats,queries`: fewer tools leave a model less to choose from, and less to read. Every area by default.
+
+These sets cover common uses:
+
+| Use | `--areas` | Access |
+|---|---|---|
+| Monitoring: whether the Pi-hole is all right, what it's doing, why a site is blocked, which device sends which queries | `insights,padd,stats,queries,info` | Read-only is enough. |
+| Blocking and allowing sites | `insights,search,domains,lists,dns` | `--allow-writes` adds rules and lists; `--allow-destructive` also changes and removes them, and pauses blocking. |
+| Local DNS and DHCP: local records, static leases, the devices on the network | `insights,config,dhcp,network` | `--allow-writes` adds records and leases; `--allow-destructive` also deletes them and changes the upstream servers and other settings. |
+
+For example, to serve the monitoring set:
+
+```bash
+gravitywell-mcp --env-file ~/.config/gravitywell/pihole.env --areas insights,padd,stats,queries,info
+```
+
+Keep `insights` in any set: the server's instructions point the model to its tools first. Sets combine, too: add `logs` to the monitoring set when you're troubleshooting.
+
+Every area:
 
 | Area | Tools |
 |---|---|
