@@ -116,3 +116,12 @@ def test_the_mcp_page_lists_every_area() -> None:
     table = page[page.index("| Area | Tools |") :].split("\n\n", 1)[0]
     listed = re.findall(r"^\| `(\w+)` \|", table, flags=re.MULTILINE)
     assert listed == sorted({tool.tags[0] for tool in list_tools(api)})
+
+
+def test_the_docs_name_only_real_areas() -> None:
+    api = gravitywell.PiHole("http://pi.hole", auth=gravitywell.PiHoleAuth("docs"))
+    known = {tool.tags[0] for tool in list_tools(api)}
+    text = (ROOT / "docs/mcp.md").read_text() + (ROOT / "llms.txt").read_text()
+    sets = re.findall(r"`(?:--areas )?(\w+(?:,\w+)+)`", text)
+    assert sets
+    assert sorted({area for areas in sets for area in areas.split(",")} - known) == []
